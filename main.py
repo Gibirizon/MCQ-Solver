@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from exam_widgets import ImageOutput, LeftMenu, MainContent
 from PIL import Image, ImageGrab, ImageTk
+from pytesseract import get_languages, image_to_string
 from settings import *
 from start_menu import StartMenu
 
@@ -41,13 +42,14 @@ class App(ctk.CTk):
             frame = self.main_content.image_import
             frame.button_import.place_forget()
             frame.label_paste.place_forget()
-            frame.image_output = ImageOutput(frame, self.resize_image)
+            self.image_output = ImageOutput(frame, self.resize_image)
 
             # i need to add other widgets !!!!!!!!!!!!!!!!!!!!!!!!!
 
     def resize_image(self, event):
         self.canvas_ratio = event.width / event.height
-
+        self.canvas_width = event.width
+        self.canvas_height = event.height
         # checking is image ratio bigger than canvas ratio (which means i need to adjust width, image height will automatically be smaller than canvas height) or smaller than canvas ratio
         if self.image_ratio > self.canvas_ratio:
             self.image_width = event.width
@@ -59,10 +61,27 @@ class App(ctk.CTk):
         self.place_image()
 
     def place_image(self):
-        
+        # deleting all other images on canvas
+        self.image_output.delete("all")
+
+        # resizing image
+        resized_image = self.image.resize(
+            (int(self.image_width), int(self.image_height))
+        )
+        self.image_tk = ImageTk.PhotoImage(image=resized_image)
+
+        # placing image
+        self.image_output.create_image(
+            self.canvas_width / 2, self.canvas_height / 2, image=self.image_tk
+        )
         print("placing image")
-        pass
 
 
 if __name__ == "__main__":
     App()
+
+# with a button, write solutions take text from image, then communicate with chatgpt
+# self.text = image_to_string(image=self.image, lang="pol")
+# print(self.text)
+
+# add widgets after paste image
