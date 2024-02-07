@@ -3,11 +3,11 @@ import customtkinter as ctk
 
 class MainContent(ctk.CTkFrame):
     def __init__(self, parent):
-        super().__init__(master=parent)
+        super().__init__(master=parent, fg_color="transparent")
 
-        self.title = Title(self, "red")
-        self.image_import = ImageImport(self, parent)
-        self.answer = Answer(self)
+        # self.title = Title(self, "red")
+        # self.image_import = ImageImport(self, parent)
+        # self.answer = Answer(self)
 
         self.grid(row=0, column=2, columnspan=3, padx=10, pady=10, sticky="nsew")
 
@@ -65,22 +65,37 @@ class Answer(ctk.CTkLabel):
 
 class LeftMenu(ctk.CTkFrame):
     def __init__(self, parent):
-        super().__init__(master=parent)
+        super().__init__(master=parent, fg_color="transparent")
 
-        self.textbox = Text(self)
-        self.settings = Settings(self)
+        # self.textbox = Text(self)
+        # self.settings = Settings(self)
 
         self.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
 
 class Settings(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, *args):
         super().__init__(master=parent, fg_color="yellow")
 
-        ctk.CTkButton(self, text="Back to main menu").pack(expand=True)
-        ctk.CTkButton(self, text="Help").pack(expand=True)
+        # buttons
+        SettingsButtons(self, "Help", args[0])
+        SettingsButtons(self, "Back to main menu", args[1])
 
         self.place(rely=0.7, relx=0, relheight=0.25, relwidth=1)
+
+
+class SettingsButtons(ctk.CTkButton):
+    def __init__(self, parent, text, func=None):
+        super().__init__(master=parent, text=text, command=func)
+
+        self.pack(expand=True)
+
+
+class GetSolutionButton(ctk.CTkButton):
+    def __init__(self, parent, text, func):
+        super().__init__(master=parent, text=text, command=func)
+
+        self.place(rely=0.9, relx=0, relheight=0.1, relwidth=1)
 
 
 class Text(ctk.CTkTextbox):
