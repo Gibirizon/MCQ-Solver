@@ -1,3 +1,5 @@
+from typing import Optional, Tuple, Union
+
 import customtkinter as ctk
 
 
@@ -73,13 +75,16 @@ class LeftMenu(ctk.CTkFrame):
         self.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
 
-class Settings(ctk.CTkFrame):
+class Settings(ctk.CTkTabview):
     def __init__(self, parent, *args):
         super().__init__(master=parent, fg_color="yellow")
 
         # buttons
-        SettingsButtons(self, "Help", args[0])
-        SettingsButtons(self, "Back to main menu", args[1])
+        self.add("Navigate")
+        self.add("Help")
+
+        SettingsButtons(self.tab("Navigate"), "Back to main menu", args[0])
+        SettingsButtons(self.tab("Help"), "Help", args[1])
 
         self.place(rely=0.7, relx=0, relheight=0.25, relwidth=1)
 
@@ -103,3 +108,5 @@ class Text(ctk.CTkTextbox):
         super().__init__(master=parent, wrap="word", fg_color="blue")
 
         self.place(relx=0, rely=0, relheight=0.65, relwidth=1)
+
+

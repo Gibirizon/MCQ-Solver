@@ -3,6 +3,7 @@ import asyncio
 import customtkinter as ctk
 import openai
 from exam_widgets import (
+    Answer,
     GetSolutionButton,
     ImageImport,
     ImageOutput,
@@ -16,7 +17,7 @@ from exam_widgets import (
 from PIL import Image, ImageGrab, ImageTk
 from pytesseract import get_languages, image_to_string
 from settings import *
-from start_menu import StartMenu
+from start_menu import HelpWindow, StartMenu
 from sydney import SydneyClient
 
 
@@ -27,14 +28,15 @@ class App(ctk.CTk):
         self.title("MayaBD")
         width = GEOMETRY[0]
         height = GEOMETRY[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
-        half_height = int((self.winfo_screenheight() / 2) - (height / 2))
-        self.geometry(f"{width}x{height}+{half_width}+{half_height}")
+        self.half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
+        self.half_height = int((self.winfo_screenheight() / 2) - (height / 2))
+        self.geometry(f"{width}x{height}+{self.half_width}+{self.half_height}")
         self.minsize(GEOMETRY[0], GEOMETRY[1])
 
         self.columnconfigure((0, 1, 2, 3, 4), weight=1, uniform="a")
         self.rowconfigure(0, weight=1, uniform="b")
         self.start_menu = StartMenu(self, self.exam_layout)
+        self.help_window = None
 
         self.mainloop()
 
@@ -48,8 +50,12 @@ class App(ctk.CTk):
 
         # left menu widgets
         self.left_menu = LeftMenu(self)
-        self.settings = Settings(self.left_menu, self.help, self.back_to_main_menu)
-        self.text = Text(self.left_menu)
+        self.settings = Settings(
+            self.left_menu,
+            self.back_to_main_menu,
+            self.help,
+        )
+        self.textbox = Text(self.left_menu)
 
         # bind to paste screenshot
         self.bind("<Control-KeyPress-v>", self.paste_image)
@@ -74,11 +80,10 @@ class App(ctk.CTk):
                 func=self.get_solution,
             )
             self.settings.paste_next_question = SettingsButtons(
-                self.settings,
+                self.settings.tab("Navigate"),
                 text="Paste next question",
                 func=self.reset_elements,
             )
-            # i need to add other widgets !!!!!!!!!!!!!!!!!!!!!!!!!
 
     def resize_image(self, event):
         self.canvas_ratio = event.width / event.height
@@ -96,7 +101,7 @@ class App(ctk.CTk):
 
     def place_image(self):
         # deleting all other images on canvas
-        self.image_import.image_output.delete("all")
+        # self.image_import.image_output.delete("all")
 
         # resizing image
         resized_image = self.image.resize(
@@ -110,39 +115,67 @@ class App(ctk.CTk):
         )
         print("placing image")
 
+    # komunikacja z Bing AI
+    async def chatbot(self, text):
+        async with SydneyClient(style="balanced") as sydney:
+            response = await sydney.ask(
+                text
+            )  # compose_stream będę używał, jak będę dodawał informacje do Textboxa, żeby znaleźć odpowiedź użyję ask_stream
+            print(response)
+            self.textbox.insert("end", response)
+
     def get_solution(self):
         # zmiana obrazku na text
         self.text = image_to_string(image=self.image, lang="pol")
         print(self.text)
 
-        # komunikacja z Bing AI
-        async def chatbot() -> None:
-            async with SydneyClient(style="balanced") as sydney:
-                async for response in sydney.ask_stream(
-                    self.text
-                ):  # compose_stream będę używał, jak będę dodawał informacje do Textboxa, żeby znaleźć odpowiedź użyję ask_stream
-                    print(response, end="", flush=True)
+        # wywołanie funkcji komunikacji z Bing
+        asyncio.run(self.chatbot(self.text))
 
-        # wywołanie funkcji
-        asyncio.run(chatbot())
+        # changing/adding widgets
+        self.settings.add("Export")
+        self.settings.export_solution = SettingsButtons(
+            self.settings.tab("Export"), "Save", self.export_solution
+        )
+
+        self.write_solutions.place_forget()
+
+        self.answer = Answer(self.main_content)
 
     # button settings functions
     def help(self):
-        print("help")
+        if self.help_window is None or not self.help_window.winfo_exists():
+            print("printing help")
+            self.help_window = HelpWindow(
+                self, self.half_width, self.half_height
+            )  # create window if its None or destroyed
+        else:
+            self.help_window.focus()  # if window exists focus it
 
     def back_to_main_menu(self):
-        print("back to main menu")
+        print("going back to main menu")
+        self.main_content.grid_forget()
+        self.left_menu.grid_forget()
+        self.start_menu = StartMenu(self, self.exam_layout)
 
     def reset_elements(self):
         print("reseting elements")
+        self.main_content.grid_forget()
+        self.left_menu.grid_forget()
+
+        # main_content widgets
+        self.main_content = MainContent(self)
+        self.title = Title(self.main_content, "red")
+        self.image_import = ImageImport(self.main_content, self)
+
+        # left menu widgets
+        self.left_menu = LeftMenu(self)
+        self.settings = Settings(self.left_menu, self.help, self.back_to_main_menu)
+        self.textbox = Text(self.left_menu)
+
+    def export_solution(self):
+        print("exporting solution")
 
 
 if __name__ == "__main__":
     App()
-
-# with a button, write solutions take text from image, then communicate with chatgpt
-
-# add widgets after paste image
-
-# change all widgets, wchich i'm working with to have immediately access to them
-# what i mean is just calling them from main.py, not from exam_widgets
