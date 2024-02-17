@@ -7,10 +7,6 @@ class MainContent(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(master=parent, fg_color="transparent")
 
-        # self.title = Title(self, "red")
-        # self.image_import = ImageImport(self, parent)
-        # self.answer = Answer(self)
-
         self.grid(row=0, column=2, columnspan=3, padx=25, pady=25, sticky="nsew")
 
 
@@ -90,9 +86,6 @@ class Answer(ctk.CTkLabel):
 class LeftMenu(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(master=parent, fg_color="transparent")
-
-        # self.textbox = Text(self)
-        # self.settings = Settings(self)
 
         self.grid(row=0, column=0, columnspan=2, padx=25, pady=25, sticky="nsew")
 

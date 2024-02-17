@@ -37,7 +37,6 @@ class HelpWindow(ctk.CTkToplevel):
         self.help_title.configure(
             font=ctk.CTkFont(family=TTITLE_FONT, size=ANSWER_FONT_SIZE)
         )
-        # self.help_title.place(relx=0.01, rely=0.01, relwidth=1, relheight=0.1)
         self.help_title.pack(pady=5)
 
         self.help_text = Text(self)

@@ -125,13 +125,9 @@ class App(ctk.CTk):
         else:
             self.image_height = event.height
             self.image_width = self.image_height * self.image_ratio
-        print(f"resizing image {event} {self.image_width} {self.image_height}")
         self.place_image()
 
     def place_image(self):
-        # deleting all other images on canvas
-        # self.image_import.image_output.delete("all")
-
         # resizing image
         resized_image = self.image.resize(
             (int(self.image_width), int(self.image_height))
@@ -142,18 +138,13 @@ class App(ctk.CTk):
         self.image_import.image_output.create_image(
             self.canvas_width / 2, self.canvas_height / 2, image=self.image_tk
         )
-        print("placing image")
 
-    # komunikacja z Bing AI
+    # Bing AI
     async def chatbot(self, prompt):
         async with SydneyClient(style="balanced") as sydney:
             response = await sydney.compose(prompt)
-
-            print(response)
             index = response.find("Odpowiedź:") + 11
-            print(index)
             self.correct_answer.set(value=response[index])
-            print(self.correct_answer.get())
             self.textbox.insert("end", response)
 
     def get_solution(self):
@@ -162,11 +153,9 @@ class App(ctk.CTk):
             image=self.image,
             lang="pol",
         )
-        print(self.text)
 
         # communication with Sydney - Bing (correct question)
         prompt = f'{PROMPT_EXPLANATION}"{self.text}"'
-        print(prompt)
         asyncio.run(self.chatbot(prompt))
 
         # changing/adding widgets
@@ -195,7 +184,6 @@ class App(ctk.CTk):
     # button settings functions
     def help(self):
         if self.help_window is None or not self.help_window.winfo_exists():
-            print("printing help")
             self.help_window = HelpWindow(
                 self
             )  # create window if its None or destroyed
@@ -203,13 +191,11 @@ class App(ctk.CTk):
             self.help_window.attributes("-topmost", True)
 
     def back_to_main_menu(self):
-        print("going back to main menu")
         self.main_content.grid_forget()
         self.left_menu.grid_forget()
         self.start_menu = StartMenu(self, self.exam_layout, self.help)
 
     def reset_elements(self):
-        print("reseting elements")
         self.main_content.grid_forget()
         self.left_menu.grid_forget()
 
@@ -224,7 +210,6 @@ class App(ctk.CTk):
         self.textbox = Text(self.left_menu)
 
     def new_file_layout(self):
-        print("new file layout")
         self.settings.new_file_button.pack_forget()
         self.settings.extend_file_button.pack_forget()
         self.settings.new_file_frame = ctk.CTkFrame(
@@ -244,7 +229,6 @@ class App(ctk.CTk):
         ).place(relx=0.5, rely=0.87, anchor="center")
 
     def extend_file_layout(self):
-        print("extend file layout")
         self.settings.new_file_button.pack_forget()
         self.settings.extend_file_button.pack_forget()
         ExtendFile(
@@ -255,7 +239,6 @@ class App(ctk.CTk):
 
     def create_new_file(self, path, file_name):
         full_path = f"{path}/{file_name}"
-        print(full_path)
         if file_name[-4:] != ".odt":
             self.file_name_string.set("Invalid file extension")
             return
@@ -269,10 +252,7 @@ class App(ctk.CTk):
     def export_solution(self, path):
 
         # have to first save img in script files, than take it from there
-        print("ok, exporting solution")
-
         dir_name = dirname(__file__)
-        print(dir_name)
         full_image_path = f"{dir_name}/exam_img.png"
         self.image.save(full_image_path)
         write_text = self.textbox.get("0.0", "end")
@@ -295,6 +275,8 @@ class App(ctk.CTk):
         textdoc.text.addElement(paragraph)
         # saving file
         textdoc.save(path)
+
+        # communicate of success
         SuccessSave(self, self.answer_and_main_button_font)
 
 
