@@ -1,7 +1,5 @@
 import asyncio
 from os.path import dirname, exists
-from shlex import quote
-from time import sleep
 
 import customtkinter as ctk
 from exam_widgets import (
