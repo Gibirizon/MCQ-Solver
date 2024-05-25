@@ -1,6 +1,6 @@
-customtkinter==5.2.0
-emoji==2.10.1
+customtkinter==5.2.2
+emoji==2.12.1
 odfpy==1.4.1
-Pillow==10.2.0
+Pillow==10.3.0
 pytesseract==0.3.10
-sydney-py==0.20.4
+sydney-py==0.21.0

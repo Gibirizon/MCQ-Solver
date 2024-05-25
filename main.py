@@ -101,7 +101,7 @@ class App(ctk.CTk):
             )
             self.write_solutions = MainButtons(
                 self.main_content,
-                "Get a solution to your question",
+                "Get an answer to your question",
                 self.get_solution,
                 self.answer_and_main_button_font,
             )
