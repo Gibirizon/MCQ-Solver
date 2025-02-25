@@ -1,7 +1,8 @@
 import customtkinter as ctk
 import emoji
+
 from exam_widgets import MainButtons, Text
-from settings import *
+from settings import HELP_TEXT, Fonts, Geometry
 from tabview_settings import CommonLabel
 
 
@@ -9,7 +10,10 @@ class StartMenu(ctk.CTkFrame):
     def __init__(self, parent, func1, func2):
         super().__init__(master=parent, fg_color="transparent")
         font = ctk.CTkFont(
-            family=ANSWER_FONT, size=ANSWER_FONT_SIZE, weight="bold", slant="italic"
+            family=Fonts.ANSWER,
+            size=Fonts.ANSWER_SIZE,
+            weight="bold",
+            slant="italic",
         )
         MainButtons(self, "IT exam", func1, font).pack(
             expand=True, ipadx=5, ipady=20, fill="x"
@@ -24,8 +28,8 @@ class StartMenu(ctk.CTkFrame):
 class HelpWindow(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(master=parent)
-        width = HELP_GEOMETRY[0]
-        height = HELP_GEOMETRY[1]
+        width = Geometry.HELP[0]
+        height = Geometry.HELP[1]
         half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
         half_height = int((self.winfo_screenheight() / 2) - (height / 2))
 
@@ -35,7 +39,7 @@ class HelpWindow(ctk.CTkToplevel):
 
         self.help_title = CommonLabel(self, "How does this program work?")
         self.help_title.configure(
-            font=ctk.CTkFont(family=TTITLE_FONT, size=ANSWER_FONT_SIZE)
+            font=ctk.CTkFont(family=Fonts.TITLE, size=Fonts.ANSWER_SIZE)
         )
         self.help_title.pack(pady=5)
 

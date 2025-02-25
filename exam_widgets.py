@@ -1,5 +1,6 @@
 import customtkinter as ctk
-from settings import *
+
+from settings import Colors, Fonts, Geometry
 from tabview_settings import CommonLabel, SettingsButtons
 
 
@@ -16,7 +17,10 @@ class Title(ctk.CTkLabel):
             master=parent,
             text="IT exam auto solutions",
             font=ctk.CTkFont(
-                family=TTITLE_FONT, size=TTITLE_FONT_SIZE, slant="italic", weight="bold"
+                family=Fonts.TITLE,
+                size=Fonts.TITLE_SIZE,
+                slant="italic",
+                weight="bold",
             ),
         )
 
@@ -25,9 +29,13 @@ class Title(ctk.CTkLabel):
 
 class ImageImport(ctk.CTkFrame):
     def __init__(self, parent, main_window, image_func):
-        super().__init__(master=parent, fg_color=IMAGE_FRAME_COLOR)
+        super().__init__(master=parent, fg_color=Colors.IMAGE_FRAME)
 
+        # image func for pasting image with path
         self.image_func = image_func
+
+        # creating attribute image_output for later usage when image will be pasted
+        self.image_output: ImageOutput | None = None
 
         # widgets
         self.button_import = SettingsButtons(self, "Import image", self.open_dialog)
@@ -61,7 +69,7 @@ class ImageOutput(ctk.CTkCanvas):
     def __init__(self, parent, resize_image_func):
         super().__init__(
             master=parent,
-            background=IMAGE_FRAME_COLOR,
+            background=Colors.IMAGE_FRAME,
             highlightthickness=0,
         )
 
@@ -74,9 +82,9 @@ class Answer(ctk.CTkLabel):
         super().__init__(
             master=parent,
             text=f"Correct answer is {correct_answer_variable}",
-            fg_color=ANSWER_BACKGROUND_COLOR,
-            text_color=ANSWER_TEXT_COLOR,
-            corner_radius=CORNER_RADIUS,
+            fg_color=Colors.ANSWER_BACKGROUND,
+            text_color=Colors.ANSWER_TEXT,
+            corner_radius=Geometry.CORNER_RADIUS,
             font=font,
         )
 
@@ -96,10 +104,10 @@ class MainButtons(ctk.CTkButton):
             master=parent,
             text=text,
             command=func,
-            fg_color=BUTTON_COLOR,
-            hover_color=BUTTON_HOVER_COLOR,
+            fg_color=Colors.BUTTON,
+            hover_color=Colors.BUTTON_HOVER,
             font=font,
-            corner_radius=CORNER_RADIUS,
+            corner_radius=Geometry.CORNER_RADIUS,
         )
 
 
@@ -108,9 +116,9 @@ class Text(ctk.CTkTextbox):
         super().__init__(
             master=parent,
             wrap="word",
-            fg_color=TEXTBOX_COLOR,
-            font=ctk.CTkFont(family=NORMAL_FONT, size=NORMAL_FONT_SIZE),
-            border_color=BORDER_TEXTBOX_COLOR,
+            fg_color=Colors.TEXTBOX,
+            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+            border_color=Colors.BORDER_TEXTBOX,
             border_width=2,
             border_spacing=10,
             corner_radius=15,

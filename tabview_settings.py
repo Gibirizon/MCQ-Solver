@@ -1,18 +1,25 @@
 import customtkinter as ctk
-from settings import *
+
+from settings import Colors, Fonts, Geometry
 
 
 class Settings(ctk.CTkTabview):
     def __init__(self, parent, *args):
         super().__init__(
             master=parent,
-            fg_color=SETTINGS_BG_COLOR,
-            segmented_button_fg_color=SETTINGS_SEGMENTED_BG_COLOR,
-            segmented_button_selected_color=SETTINGS_SELECTED_BUTTON_COLOR,
-            segmented_button_unselected_color=SETTINGS_SEGMENTED_BG_COLOR,
-            segmented_button_selected_hover_color=BUTTON_HOVER_COLOR,
-            segmented_button_unselected_hover_color=BUTTON_HOVER_COLOR,
+            fg_color=Colors.SETTINGS_BG,
+            segmented_button_fg_color=Colors.SETTINGS_SEGMENTED_BG,
+            segmented_button_selected_color=Colors.SETTINGS_SELECTED_BUTTON,
+            segmented_button_unselected_color=Colors.SETTINGS_SEGMENTED_BG,
+            segmented_button_selected_hover_color=Colors.BUTTON_HOVER,
+            segmented_button_unselected_hover_color=Colors.BUTTON_HOVER,
         )
+        # buttons after solution generation
+        self.new_file_button: SettingsButtons | None = None
+        self.extend_file_button: SettingsButtons | None = None
+
+        # frame created after chosing to create new/extend file
+        self.new_file_frame: ctk.CTkFrame | None = None
 
         # buttons
         self.add("Navigate")
@@ -38,9 +45,9 @@ class SettingsButtons(ctk.CTkButton):
             master=parent,
             text=text,
             command=func,
-            font=ctk.CTkFont(family=NORMAL_FONT, size=NORMAL_FONT_SIZE),
-            fg_color=BUTTON_COLOR,
-            hover_color=BUTTON_HOVER_COLOR,
+            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+            fg_color=Colors.BUTTON,
+            hover_color=Colors.BUTTON_HOVER,
         )
 
 
@@ -49,7 +56,7 @@ class CommonLabel(ctk.CTkLabel):
         super().__init__(
             master=parent,
             text=text,
-            font=ctk.CTkFont(family=NORMAL_FONT, size=NORMAL_FONT_SIZE),
+            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
         )
 
 
@@ -58,7 +65,7 @@ class SettingsEntry(ctk.CTkEntry):
         super().__init__(
             master=parent,
             textvariable=textvariable,
-            font=ctk.CTkFont(family=NORMAL_FONT, size=NORMAL_FONT_SIZE),
+            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
         )
 
         self.pack(expand=True, fill="x", padx=10, pady=5)
@@ -66,7 +73,7 @@ class SettingsEntry(ctk.CTkEntry):
 
 class ExtendFile(ctk.CTkFrame):
     def __init__(self, parent, path_string, export_func):
-        super().__init__(master=parent, fg_color=SETTINGS_SEGMENTED_BG_COLOR)
+        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
         self.path_string = path_string
         SettingsButtons(self, "Open file search", self.open_file_dialog).pack(
             expand=True, pady=5
@@ -89,7 +96,7 @@ class ExtendFile(ctk.CTkFrame):
 
 class NewFilePath(ctk.CTkFrame):
     def __init__(self, parent, path_string):
-        super().__init__(master=parent, fg_color=SETTINGS_SEGMENTED_BG_COLOR)
+        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
         self.path_string = path_string
         SettingsButtons(self, "Open directory search", self.open_dir_dialog).pack(
             pady=5, expand=True
@@ -107,8 +114,8 @@ class NewFilePath(ctk.CTkFrame):
 
 
 class FileName(ctk.CTkFrame):
-    def __init__(self, parent, file_name_string, font):
-        super().__init__(master=parent, fg_color=SETTINGS_SEGMENTED_BG_COLOR)
+    def __init__(self, parent, file_name_string):
+        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
         self.file_name = file_name_string
         CommonLabel(self, "Enter new file name:").pack(pady=5, expand=True)
         SettingsEntry(self, self.file_name)
@@ -119,8 +126,8 @@ class FileName(ctk.CTkFrame):
 class SuccessSave(ctk.CTkToplevel):
     def __init__(self, parent, font):
         super().__init__(master=parent)
-        width = SUCCEESS_SAVE_GEOMETRY[0]
-        height = SUCCEESS_SAVE_GEOMETRY[1]
+        width = Geometry.SUCCEESS_SAVE[0]
+        height = Geometry.SUCCEESS_SAVE[1]
         half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
         half_height = int((self.winfo_screenheight() / 2) - (height / 2))
 
