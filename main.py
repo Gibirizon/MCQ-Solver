@@ -1,38 +1,13 @@
-import asyncio
-from os.path import dirname, exists
-from typing import cast
-
 import customtkinter as ctk
-from dotenv import dotenv_values
-from odf import teletype
-from odf.draw import Frame
-from odf.draw import Image as odfImage
-from odf.opendocument import OpenDocumentText, load
-from odf.text import P
-from openai import OpenAI
-from PIL import Image, ImageGrab, ImageTk
-from pytesseract import image_to_string
+from PIL.Image import Image
 
-from exam_widgets import (
-    Answer,
-    ImageImport,
-    ImageOutput,
+from help_window import HelpWindow
+from main_frames import (
     LeftMenu,
-    MainButtons,
     MainContent,
-    Text,
-    Title,
 )
-from settings import PROMPT_EXPLANATION, Fonts, Geometry
-from start_menu import HelpWindow, StartMenu
-from tabview_settings import (
-    ExtendFile,
-    FileName,
-    NewFilePath,
-    Settings,
-    SettingsButtons,
-    SuccessSave,
-)
+from settings import Geometry
+from start_menu import StartMenu
 
 
 class App(ctk.CTk):
@@ -58,183 +33,24 @@ class App(ctk.CTk):
             uniform="b",
         )
 
-        # data
-        self.file_path_string = ctk.StringVar()
-        self.dir_path_string = ctk.StringVar()
-        self.file_name_string = ctk.StringVar()
-        self.correct_answer = ctk.StringVar(value="...")
-
-        # fonts
-        self.answer_and_main_button_font = ctk.CTkFont(
-            family=Fonts.ANSWER,
-            size=Fonts.ANSWER_SIZE,
-            weight="bold",
-        )
-
         # start widgets
         self.start_menu = StartMenu(
             self,
             self.exam_layout,
             self.help,
         )
-        self.help_window = None
-
-        # .env file - API KEY for OpenRuoter
-        self.api_key = dotenv_values(".env")["API_KEY"]
 
         self.mainloop()
 
     def exam_layout(self):
         self.start_menu.place_forget()
 
-        # main_content widgets
+        # main_content widgets on the right side - title + image import
         self.main_content = MainContent(self)
-        self.main_title = Title(self.main_content)
-        self.image_import = ImageImport(
-            self.main_content,
-            self,
-            self.paste_image,
-        )
 
-        # left menu widgets
-        self.left_menu = LeftMenu(self)
-        self.settings = Settings(
-            self.left_menu,
-            self.back_to_main_menu,
-            self.help,
-        )
+        # left menu widgets - settings + textbox
+        self.left_menu = LeftMenu(self, self.back_to_main_menu, self.help)
 
-        self.textbox = Text(self.left_menu)
-
-        # bind to paste screenshot
-        self.bind(
-            "<Control-KeyPress-v>",
-            self.paste_image,
-        )
-
-    def paste_image(
-        self,
-        _=None,
-        path=None,
-    ):
-        if self.focus_get() == self.image_import:
-            # working on image
-            self.image = Image.open(path) if path else ImageGrab.grabclipboard()
-            if not isinstance(self.image, Image.Image):
-                return
-            self.image_ratio = self.image.size[0] / self.image.size[1]
-            self.image_tk = ImageTk.PhotoImage(image=self.image)
-
-            # working on layout
-            self.image_import.button_import.place_forget()
-            self.image_import.label_paste.place_forget()
-
-            self.image_import.image_output = ImageOutput(
-                self.image_import,
-                self.resize_image,
-            )
-            self.write_solutions = MainButtons(
-                self.main_content,
-                "Get an answer to your question",
-                self.get_solution,
-                self.answer_and_main_button_font,
-            )
-            self.write_solutions.place(
-                rely=0.9,
-                relx=0,
-                relheight=0.1,
-                relwidth=1,
-            )
-            SettingsButtons(
-                self.settings.tab("Navigate"),
-                text="Paste next question",
-                func=self.reset_elements,
-            ).pack(expand=True)
-
-    def resize_image(self, event):
-        self.canvas_ratio = event.width / event.height
-        self.canvas_width = event.width
-        self.canvas_height = event.height
-        # checking is image ratio bigger than canvas ratio (which means i need to adjust width, image height will automatically be smaller than canvas height) or smaller than canvas ratio
-        if self.image_ratio > self.canvas_ratio:
-            self.image_width = event.width
-            self.image_height = self.image_width / self.image_ratio
-        else:
-            self.image_height = event.height
-            self.image_width = self.image_height * self.image_ratio
-        self.place_image()
-
-    def place_image(self):
-        # resizing image
-        if not isinstance(self.image, Image.Image):
-            return
-        resized_image = self.image.resize(
-            (
-                int(self.image_width),
-                int(self.image_height),
-            )
-        )
-        self.image_tk = ImageTk.PhotoImage(image=resized_image)
-
-        # placing image
-        cast(ImageOutput, self.image_import.image_output).create_image(
-            self.canvas_width / 2,
-            self.canvas_height / 2,
-            image=self.image_tk,
-        )
-
-    # Bing AI
-    async def chatbot(self, prompt):
-        client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key,
-        )
-
-        completion = client.chat.completions.create(
-            model="deepseek/deepseek-r1:free",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        # self.correct_answer.set(value=completion.choices[0].message.content)
-        self.textbox.insert(
-            "end",
-            completion.choices[0].message.content,
-        )
-
-    def get_solution(self):
-        # change image to text
-        self.text = image_to_string(
-            image=self.image,
-            lang="pol",
-        )
-
-        # communication with Sydney - Bing (correct question)
-        prompt = f'{PROMPT_EXPLANATION}"{self.text}"'
-        asyncio.run(self.chatbot(prompt))
-
-        # changing/adding widgets
-        self.settings.add("Export")
-        self.settings.new_file_button = SettingsButtons(
-            self.settings.tab("Export"),
-            "Create new file (required to add content to this file later)",
-            self.new_file_layout,
-        )
-        self.settings.extend_file_button = SettingsButtons(
-            self.settings.tab("Export"),
-            "Extend previously created file",
-            self.extend_file_layout,
-        )
-        self.settings.new_file_button.pack(expand=True)
-        self.settings.extend_file_button.pack(expand=True)
-
-        self.write_solutions.place_forget()
-
-        self.answer = Answer(
-            self.main_content,
-            self.answer_and_main_button_font,
-            self.correct_answer.get(),
-        )
-
-    # button settings functions
     def help(self):
         if self.help_window is None or not self.help_window.winfo_exists():
             self.help_window = HelpWindow(
@@ -257,119 +73,27 @@ class App(ctk.CTk):
             self.help,
         )
 
+    def paste_next_question_button(self):
+        self.left_menu.settings.create_button(
+            "Navigate", "Paste next question", self.reset_elements
+        )
+
+    def export_settings_section(self, image: Image):
+        self.left_menu.settings.add_section_for_export(image)
+
+    def provide_solution(self, solution: str | None) -> bool:
+        if solution is None:
+            # TODO - show communicate of success / failure !!!!!!!!!!!!!!!!!!
+            return False
+
+        self.left_menu.add_solution(solution)
+        return True
+
     def reset_elements(self):
         self.main_content.grid_forget()
         self.left_menu.grid_forget()
 
-        # main_content widgets
-        self.main_content = MainContent(self)
-        self.main_title = Title(self.main_content)
-        self.image_import = ImageImport(
-            self.main_content,
-            self,
-            self.paste_image,
-        )
-
-        # left menu widgets
-        self.left_menu = LeftMenu(self)
-        self.settings = Settings(
-            self.left_menu,
-            self.back_to_main_menu,
-            self.help,
-        )
-        self.textbox = Text(self.left_menu)
-
-    def new_file_layout(self):
-        cast(SettingsButtons, self.settings.new_file_button).pack_forget()
-        cast(SettingsButtons, self.settings.extend_file_button).pack_forget()
-        self.settings.new_file_frame = ctk.CTkFrame(
-            self.settings.tab("Export"),
-            fg_color="transparent",
-        )
-        self.settings.new_file_frame.place(
-            relx=0.01,
-            rely=0.01,
-            relheight=0.75,
-            relwidth=1,
-        )
-        NewFilePath(
-            self.settings.new_file_frame,
-            self.dir_path_string,
-        )
-        FileName(
-            self.settings.new_file_frame,
-            self.file_name_string,
-        )
-        SettingsButtons(
-            self.settings.tab("Export"),
-            "Create new file",
-            lambda: self.create_new_file(
-                self.dir_path_string.get(),
-                self.file_name_string.get(),
-            ),
-        ).place(
-            relx=0.5,
-            rely=0.87,
-            anchor="center",
-        )
-
-    def extend_file_layout(
-        self,
-    ):
-        cast(SettingsButtons, self.settings.new_file_button).pack_forget()
-        cast(SettingsButtons, self.settings.extend_file_button).pack_forget()
-        ExtendFile(
-            self.settings.tab("Export"),
-            self.file_path_string,
-            self.export_solution,
-        )
-
-    def create_new_file(self, path, file_name):
-        full_path = f"{path}/{file_name}"
-        if file_name[-4:] != ".odt":
-            self.file_name_string.set("Invalid file extension")
-            return
-        elif exists(full_path):
-            self.file_name_string.set("The file already exists")
-            return
-        textdoc = OpenDocumentText()
-        textdoc.save(full_path)
-        self.export_solution(full_path)
-
-    def export_solution(self, path):
-        # have to first save img in script files, than take it from there
-        dir_name = dirname(__file__)
-        full_image_path = f"{dir_name}/exam_img.png"
-        cast(Image.Image, self.image).save(full_image_path)
-        write_text = self.textbox.get("0.0", "end")
-
-        # adding image
-        textdoc = load(path)
-        p_img = P()
-        textdoc.text.addElement(p_img)  # pyright: ignore
-        photoframe = Frame(
-            width=f"{cast(Image.Image, self.image).size[0] / 2}pt",
-            height=f"{cast(Image.Image, self.image).size[1] / 2}pt",
-            anchortype="paragraph",
-        )
-        href = textdoc.addPicture(full_image_path)
-        photoframe.addElement(odfImage(href=href))
-        p_img.addElement(photoframe)
-        # adding text
-        paragraph = P()
-        teletype.addTextToElement(
-            paragraph,
-            write_text,
-        )
-        textdoc.text.addElement(paragraph)  # pyright: ignore
-        # saving file
-        textdoc.save(path)
-
-        # communicate of success
-        SuccessSave(
-            self,
-            self.answer_and_main_button_font,
-        )
+        self.exam_layout()
 
 
 if __name__ == "__main__":

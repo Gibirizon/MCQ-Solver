@@ -1,10 +1,22 @@
-import customtkinter as ctk
+from os.path import dirname
+from typing import cast
 
-from settings import Colors, Fonts, Geometry
+import customtkinter as ctk
+from odf import teletype
+from odf.draw import Frame
+from odf.draw import Image as odfImage
+from odf.opendocument import load
+from odf.text import P
+from PIL.Image import Image
+
+from export_files import ExtendFile, NewFile
+from settings import Colors
+from tabview_utils import SettingsButtons
+from user_information import InformationWindow
 
 
 class Settings(ctk.CTkTabview):
-    def __init__(self, parent, *args):
+    def __init__(self, parent, back_func, help_func):
         super().__init__(
             master=parent,
             fg_color=Colors.SETTINGS_BG,
@@ -14,127 +26,104 @@ class Settings(ctk.CTkTabview):
             segmented_button_selected_hover_color=Colors.BUTTON_HOVER,
             segmented_button_unselected_hover_color=Colors.BUTTON_HOVER,
         )
-        # buttons after solution generation
-        self.new_file_button: SettingsButtons | None = None
-        self.extend_file_button: SettingsButtons | None = None
+        self.left_menu = parent
+        # help window not visible at creation
+        self.help_window = None
 
-        # frame created after chosing to create new/extend file
-        self.new_file_frame: ctk.CTkFrame | None = None
-
-        # buttons
+        # tabs
         self.add("Navigate")
         self.add("Help")
 
+        # buttons for going back to main menu and getting help instructions
         SettingsButtons(
             self.tab("Navigate"),
             "Back to main menu",
-            args[0],
+            back_func,
         ).pack(expand=True)
         SettingsButtons(
             self.tab("Help"),
             "Help",
-            args[1],
+            help_func,
         ).pack(expand=True)
+
+        # data
+        self.file_path_string = ctk.StringVar()
+        self.dir_path_string = ctk.StringVar()
+        self.file_name_string = ctk.StringVar()
 
         self.place(rely=0.65, relx=0, relheight=0.35, relwidth=1)
 
+    def create_button(self, tab: str, text: str, func):
+        SettingsButtons(self.tab(tab), text, func).pack(expand=True)
 
-class SettingsButtons(ctk.CTkButton):
-    def __init__(self, parent, text, func=None):
-        super().__init__(
-            master=parent,
-            text=text,
-            command=func,
-            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
-            fg_color=Colors.BUTTON,
-            hover_color=Colors.BUTTON_HOVER,
+    def add_section_for_export(self, image: Image):
+        self.add("Export")
+        self.new_file_button = SettingsButtons(
+            self.tab("Export"),
+            "Create new file (required to add content to this file later)",
+            self.new_file_layout,
+        )
+        self.new_file_button.pack(expand=True)
+        self.extend_file_button = SettingsButtons(
+            self.tab("Export"),
+            "Extend previously created file",
+            self.extend_file_layout,
+        )
+        self.extend_file_button.pack(expand=True)
+        # save image to later export it
+        self.image = image
+
+    def remove_button_in_export(self):
+        cast(SettingsButtons, self.new_file_button).pack_forget()
+        cast(SettingsButtons, self.extend_file_button).pack_forget()
+
+    def new_file_layout(self):
+        self.remove_button_in_export()
+        NewFile(
+            self.tab(
+                "Export",
+            ),
+            self.dir_path_string,
+            self.file_name_string,
+            self.export_solution,
         )
 
-
-class CommonLabel(ctk.CTkLabel):
-    def __init__(self, parent, text):
-        super().__init__(
-            master=parent,
-            text=text,
-            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+    def extend_file_layout(self):
+        self.remove_button_in_export()
+        ExtendFile(
+            self.tab("Export"),
+            self.file_path_string,
+            self.export_solution,
         )
 
+    def export_solution(self, path):
+        # have to first save img in script files, than take it from there
+        dir_name = dirname(__file__)
+        full_image_path = f"{dir_name}/exam_img.png"
+        cast(Image, self.image).save(full_image_path)
+        write_text = self.left_menu.textbox.get("0.0", "end")
 
-class SettingsEntry(ctk.CTkEntry):
-    def __init__(self, parent, textvariable):
-        super().__init__(
-            master=parent,
-            textvariable=textvariable,
-            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+        # adding image
+        textdoc = load(path)
+        p_img = P()
+        textdoc.text.addElement(p_img)  # pyright: ignore
+        photoframe = Frame(
+            width=f"{cast(Image, self.image).size[0] / 2}pt",
+            height=f"{cast(Image, self.image).size[1] / 2}pt",
+            anchortype="paragraph",
         )
-
-        self.pack(expand=True, fill="x", padx=10, pady=5)
-
-
-class ExtendFile(ctk.CTkFrame):
-    def __init__(self, parent, path_string, export_func):
-        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
-        self.path_string = path_string
-        SettingsButtons(self, "Open file search", self.open_file_dialog).pack(
-            expand=True, pady=5
+        href = textdoc.addPicture(full_image_path)
+        photoframe.addElement(odfImage(href=href))
+        p_img.addElement(photoframe)
+        # adding text
+        paragraph = P()
+        teletype.addTextToElement(
+            paragraph,
+            write_text,
         )
-        SettingsEntry(self, self.path_string)
-        SettingsButtons(
-            self, "Save solution to a file", lambda: export_func(self.path_string.get())
-        ).pack(expand=True, pady=5)
+        textdoc.text.addElement(paragraph)  # pyright: ignore
+        # saving file
+        textdoc.save(path)
 
-        self.pack(expand=True, fill="both")
-
-    def open_file_dialog(self):
-        path = ctk.filedialog.askopenfilename(
-            filetypes=(("text files", "*.odt"), ("text files", "*.docx")),
-            title="Choose file to extend",
-            initialdir="/home",
-        )
-        self.path_string.set(path)
-
-
-class NewFilePath(ctk.CTkFrame):
-    def __init__(self, parent, path_string):
-        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
-        self.path_string = path_string
-        SettingsButtons(self, "Open directory search", self.open_dir_dialog).pack(
-            pady=5, expand=True
-        )
-        SettingsEntry(self, self.path_string)
-
-        self.pack(side="left", expand=True, fill="both", padx=10, pady=5)
-
-    def open_dir_dialog(self):
-        path = ctk.filedialog.askdirectory(
-            title="Choose directory to create file",
-            initialdir="/home",
-        )
-        self.path_string.set(path)
-
-
-class FileName(ctk.CTkFrame):
-    def __init__(self, parent, file_name_string):
-        super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
-        self.file_name = file_name_string
-        CommonLabel(self, "Enter new file name:").pack(pady=5, expand=True)
-        SettingsEntry(self, self.file_name)
-
-        self.pack(side="left", expand=True, fill="both", padx=10, pady=5)
-
-
-class SuccessSave(ctk.CTkToplevel):
-    def __init__(self, parent, font):
-        super().__init__(master=parent)
-        width = Geometry.SUCCEESS_SAVE[0]
-        height = Geometry.SUCCEESS_SAVE[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
-        half_height = int((self.winfo_screenheight() / 2) - (height / 2))
-
-        self.geometry(f"{width}x{height}+{half_width}+{half_height}")
-        self.minsize(width, height)
-        self.title("Success")
-
-        self.success_label = CommonLabel(self, "Successfully saved file")
-        self.success_label.configure(font=font)
-        self.success_label.pack(expand=True, fill="both")
+        # message of success
+        InformationWindow(self.left_menu.master)

@@ -1,9 +1,6 @@
 import customtkinter as ctk
-import emoji
 
-from exam_widgets import MainButtons, Text
-from settings import HELP_TEXT, Fonts, Geometry
-from tabview_settings import CommonLabel
+from settings import Colors, Fonts, Geometry
 
 
 class StartMenu(ctk.CTkFrame):
@@ -15,37 +12,24 @@ class StartMenu(ctk.CTkFrame):
             weight="bold",
             slant="italic",
         )
-        MainButtons(self, "IT exam", func1, font).pack(
+        StartButton(self, "IT exam", func1, font).pack(
             expand=True, ipadx=5, ipady=20, fill="x"
         )
-        MainButtons(self, "Help", func2, font).pack(
+        StartButton(self, "Help", func2, font).pack(
             expand=True, ipadx=5, ipady=20, fill="x"
         )
 
         self.place(relx=0.5, rely=0.5, relheight=0.5, relwidth=0.3, anchor="center")
 
 
-class HelpWindow(ctk.CTkToplevel):
-    def __init__(self, parent):
-        super().__init__(master=parent)
-        width = Geometry.HELP[0]
-        height = Geometry.HELP[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
-        half_height = int((self.winfo_screenheight() / 2) - (height / 2))
-
-        self.geometry(f"{width}x{height}+{half_width}+{half_height}")
-        self.minsize(width, height)
-        self.title("Help")
-
-        self.help_title = CommonLabel(self, "How does this program work?")
-        self.help_title.configure(
-            font=ctk.CTkFont(family=Fonts.TITLE, size=Fonts.ANSWER_SIZE)
+class StartButton(ctk.CTkButton):
+    def __init__(self, parent, text, func, font):
+        super().__init__(
+            master=parent,
+            text=text,
+            command=func,
+            fg_color=Colors.BUTTON,
+            hover_color=Colors.BUTTON_HOVER,
+            font=font,
+            corner_radius=Geometry.CORNER_RADIUS,
         )
-        self.help_title.pack(pady=5)
-
-        self.help_text = Text(self)
-        self.help_text.insert("end", HELP_TEXT)
-        self.help_text.insert("end", emoji.emojize("Good luck! 	:grinning_face:"))
-
-        self.help_text.configure(state="disabled")
-        self.help_text.pack(expand=True, fill="both", padx=8, pady=5)

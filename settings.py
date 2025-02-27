@@ -48,7 +48,6 @@ Odpowiedź B - DNS to protokół służący do tłumaczenia nazw domenowych (np.
 Odpowiedź D - SSH służy do zdalnego zarządzania i bezpiecznego dostępu do zdalnych systemów. Udostępnia wiersz poleceń na komputerze zdalnym. Działa na porcie 22 i zapewnia silnie uwierzytelnianie i szyfrowany transport danych między klientem a komputerem zdalnym. Protokół SSH nie jest zatem związany z tematem pytania, gdyż posiada on zupełnie odmienne zastosowanie.
 ```
 Używaj zwięzłego, konkretnego języka, który będzie łatwy do zrozumienia.
-Tak wygląda pytanie:
 """
 
 
