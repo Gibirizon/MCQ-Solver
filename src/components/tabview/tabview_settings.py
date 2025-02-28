@@ -51,7 +51,7 @@ class Settings(ctk.CTkTabview):
         self.dir_path_string = ctk.StringVar()
         self.file_name_string = ctk.StringVar()
 
-        self.place(rely=0.65, relx=0, relheight=0.35, relwidth=1)
+        self.place(rely=0.75, relx=0, relheight=0.25, relwidth=1)
 
     def create_button(self, tab: str, text: str, func):
         SettingsButtons(self.tab(tab), text, func).pack(expand=True)

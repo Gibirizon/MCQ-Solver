@@ -1,6 +1,6 @@
 # For windows geometry and elements radius
 class Geometry:
-    MAIN = (1000, 600)
+    MAIN = (1200, 1000)
     HELP = (500, 500)
     SUCCEESS_SAVE = (500, 200)
     CORNER_RADIUS = 20

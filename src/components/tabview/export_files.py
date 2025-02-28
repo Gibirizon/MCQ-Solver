@@ -62,8 +62,8 @@ class NewFile(ctk.CTkFrame):
         )
 
     def create_new_file(self):
-        full_path = f"{self.dir_path}/{self.file_name}"
-        if self.file_name[-4:] != ".odt":
+        full_path = f"{self.dir_path.get()}/{self.file_name.get()}"
+        if self.file_name.get()[-4:] != ".odt":
             self.file_name.set("Invalid file extension")
             return
         elif exists(full_path):

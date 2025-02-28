@@ -32,6 +32,7 @@ class App(ctk.CTk):
             weight=1,
             uniform="b",
         )
+        self.help_window = None
 
         # start widgets
         self.start_menu = StartMenu(
@@ -81,13 +82,8 @@ class App(ctk.CTk):
     def export_settings_section(self, image: Image):
         self.left_menu.settings.add_section_for_export(image)
 
-    def provide_solution(self, solution: str | None) -> bool:
-        if solution is None:
-            # TODO - show communicate of success / failure !!!!!!!!!!!!!!!!!!
-            return False
-
+    def provide_solution(self, solution: str):
         self.left_menu.add_solution(solution)
-        return True
 
     def reset_elements(self):
         self.main_content.grid_forget()

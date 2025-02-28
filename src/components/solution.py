@@ -7,7 +7,11 @@ import customtkinter as ctk
 from dotenv import dotenv_values
 from openai import OpenAI
 from PIL.Image import Image
-from pytesseract import image_to_string
+
+from src.components.basic_widgets import Text
+
+if TYPE_CHECKING:
+    from src.components.main_frames import MainContent
 
 from ..settings import PROMPT_EXPLANATION, Colors, Fonts, Geometry
 
@@ -17,7 +21,13 @@ if TYPE_CHECKING:
 
 class SolutionButton(ctk.CTkButton):
     def __init__(
-        self, parent: ctk.CTkFrame, text: str, image: Image, main_window: "App"
+        self,
+        parent: "MainContent",
+        text: str,
+        image: Image,
+        main_window: "App",
+        question_editor: Text,
+        mode: ctk.StringVar,
     ):
         super().__init__(
             master=parent,
@@ -32,8 +42,11 @@ class SolutionButton(ctk.CTkButton):
             ),
             corner_radius=Geometry.CORNER_RADIUS,
         )
+        self.parent = parent
         self.main_window = main_window
         self.image = image
+        self.question_editor = question_editor
+        self.mode = mode
         # .env file - API KEY for OpenRuoter
         current_file = Path(__file__)
         project_root = current_file.parent.parent.parent
@@ -41,9 +54,9 @@ class SolutionButton(ctk.CTkButton):
         self.api_key = dotenv_values(env_path)["API_KEY"]
 
         self.place(
-            rely=0.9,
+            rely=0.95,
             relx=0,
-            relheight=0.1,
+            relheight=0.05,
             relwidth=1,
         )
 
@@ -65,23 +78,25 @@ class SolutionButton(ctk.CTkButton):
         return base64.b64encode(img_bytes).decode("utf-8")
 
     def generate_solution(self):
-        # # change image to text
-        # text = image_to_string(
-        #     image=self.image,
-        #     lang="pol",
-        # )
+        if self.mode.get() == "text":
+            text = self.question_editor.get("0.0", "end")
+            prompt = f"{PROMPT_EXPLANATION}\nPytanie załączyłem jako tekst:\n {text}"
+            correct_answer = self.chatbot(prompt)
+        else:
+            prompt = f"{PROMPT_EXPLANATION}\nPytanie załączyłem jako zdjęcie."
+            base64_string = self.encode_pil_image(cast(Image, self.image))
+            correct_answer = self.chatbot(prompt, base64_string)
 
-        # prompt = f'{PROMPT_EXPLANATION}\nPytanie załączyłem jako tekst: "{text}"'
-        prompt = f"{PROMPT_EXPLANATION}\nPytanie załączyłem jako zdjęcie."
-        base64_string = self.encode_pil_image(cast(Image, self.image))
-        correct_answer = self.chatbot(prompt, base64_string)
+        # TODO, when there is no answer, indicate it to user, try to use different model
 
-        # showing solution
-        if self.main_window.provide_solution(correct_answer):
+        # showing solution and removing additional elements
+        if correct_answer:
+            self.main_window.provide_solution(correct_answer)
             # the solution was correctly generated so we can add export settings and delete this button
             self.main_window.export_settings_section(self.image)
 
             self.place_forget()
+            self.parent.remove_elements()
 
     def chatbot(self, prompt: str, base64_img: str | None = None) -> str | None:
         client = OpenAI(

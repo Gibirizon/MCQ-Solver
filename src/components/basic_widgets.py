@@ -16,7 +16,7 @@ class Title(ctk.CTkLabel):
             ),
         )
 
-        self.place(rely=0, relx=0, relheight=0.15, relwidth=1)
+        self.place(rely=0, relx=0, relheight=0.07, relwidth=1)
 
 
 class Text(ctk.CTkTextbox):
@@ -34,8 +34,6 @@ class Text(ctk.CTkTextbox):
             corner_radius=15,
         )
 
-        self.place(relx=0, rely=0, relheight=0.65, relwidth=1)
-
 
 class CommonLabel(ctk.CTkLabel):
     def __init__(self, parent, text):
@@ -46,3 +44,21 @@ class CommonLabel(ctk.CTkLabel):
                 family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE, weight="normal"
             ),
         )
+
+
+class RadioButton(ctk.CTkRadioButton):
+    def __init__(
+        self, parent: ctk.CTkFrame, text: str, variable: ctk.StringVar, value: str
+    ):
+        super().__init__(
+            master=parent,
+            text=text,
+            font=ctk.CTkFont(
+                family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE, weight="normal"
+            ),
+            variable=variable,
+            value=value,
+            fg_color=Colors.BUTTON,
+            hover_color=Colors.BUTTON_HOVER,
+        )
+        self.variable = variable

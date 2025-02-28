@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "customtkinter>=5.2.2",
+    "debugpy>=1.8.12",
     "dotenv>=0.9.9",
     "emoji>=2.14.1",
     "odfpy>=1.4.1",

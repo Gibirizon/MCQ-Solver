@@ -36,15 +36,12 @@ class ImageImport(ctk.CTkFrame):
             self.paste_image,
         )
 
-        # place in mainContent with 65% height
-        self.place(rely=0.2, relx=0, relheight=0.65, relwidth=1)
+        # place in mainContent with 50% height
+        self.place(rely=0.08, relx=0, relheight=0.5, relwidth=1)
 
     def open_dialog(self):
         path = ctk.filedialog.askopenfilename(
-            filetypes=(
-                ("image files", "*.jpg"),
-                ("image files", "*.png"),
-            ),
+            filetypes=(),
             title="Choose image",
             initialdir="/home",
         )
@@ -73,7 +70,7 @@ class ImageImport(ctk.CTkFrame):
                 self,
                 self.resize_image,
             )
-            self.main_content.create_answer_button(self.image)
+            self.main_content.add_elements(self.image)  # add edit box, answer button
             self.main_window.paste_next_question_button()
 
     def resize_image(self, event):
