@@ -3,13 +3,12 @@ from typing import TYPE_CHECKING, cast
 import customtkinter as ctk
 from PIL import Image, ImageGrab, ImageTk
 
-from basic_widgets import CommonLabel
+from ..settings import Colors
+from .basic_widgets import CommonLabel
+from .tabview.tabview_settings import SettingsButtons
 
 if TYPE_CHECKING:
-    from main import App
-
-from settings import Colors
-from tabview_settings import SettingsButtons
+    from ..app import App
 
 
 class ImageImport(ctk.CTkFrame):

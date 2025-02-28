@@ -1,9 +1,9 @@
 import customtkinter as ctk
 
-from basic_widgets import Text, Title
-from image import ImageImport
-from solution import SolutionButton
-from tabview_settings import Settings
+from .basic_widgets import Text, Title
+from .image import ImageImport
+from .solution import SolutionButton
+from .tabview.tabview_settings import Settings
 
 
 class MainContent(ctk.CTkFrame):

@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-from settings import Colors, Fonts, Geometry
+from ..settings import Colors, Fonts, Geometry
 
 
 class StartMenu(ctk.CTkFrame):

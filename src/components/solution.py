@@ -1,5 +1,6 @@
 import base64
 from io import BytesIO
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import customtkinter as ctk
@@ -8,9 +9,10 @@ from openai import OpenAI
 from PIL.Image import Image
 from pytesseract import image_to_string
 
+from ..settings import PROMPT_EXPLANATION, Colors, Fonts, Geometry
+
 if TYPE_CHECKING:
-    from main import App
-from settings import PROMPT_EXPLANATION, Colors, Fonts, Geometry
+    from ..app import App
 
 
 class SolutionButton(ctk.CTkButton):
@@ -33,7 +35,10 @@ class SolutionButton(ctk.CTkButton):
         self.main_window = main_window
         self.image = image
         # .env file - API KEY for OpenRuoter
-        self.api_key = dotenv_values(".env")["API_KEY"]
+        current_file = Path(__file__)
+        project_root = current_file.parent.parent.parent
+        env_path = project_root / ".env"
+        self.api_key = dotenv_values(env_path)["API_KEY"]
 
         self.place(
             rely=0.9,

@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
-from basic_widgets import CommonLabel
-from settings import Fonts, Geometry
+from ..components.basic_widgets import CommonLabel
+from ..settings import Fonts, Geometry
 
 
 class InformationWindow(ctk.CTkToplevel):

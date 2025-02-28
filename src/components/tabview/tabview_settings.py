@@ -9,10 +9,10 @@ from odf.opendocument import load
 from odf.text import P
 from PIL.Image import Image
 
-from export_files import ExtendFile, NewFile
-from settings import Colors
-from tabview_utils import SettingsButtons
-from user_information import InformationWindow
+from ...settings import Colors
+from ...windows.user_information import InformationWindow
+from .export_files import ExtendFile, NewFile
+from .tabview_utils import SettingsButtons
 
 
 class Settings(ctk.CTkTabview):

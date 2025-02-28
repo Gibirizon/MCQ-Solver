@@ -1,8 +1,8 @@
 import customtkinter as ctk
 import emoji
 
-from basic_widgets import CommonLabel, Text
-from settings import HELP_TEXT, Fonts, Geometry
+from ..components.basic_widgets import CommonLabel, Text
+from ..settings import HELP_TEXT, Fonts, Geometry
 
 
 class HelpWindow(ctk.CTkToplevel):
@@ -19,7 +19,9 @@ class HelpWindow(ctk.CTkToplevel):
 
         self.help_title = CommonLabel(self, "How does this program work?")
         self.help_title.configure(
-            font=ctk.CTkFont(family=Fonts.TITLE, size=Fonts.ANSWER_SIZE)
+            font=ctk.CTkFont(
+                family=Fonts.TITLE, size=Fonts.ANSWER_SIZE, weight="normal"
+            )
         )
         self.help_title.pack(pady=5)
 

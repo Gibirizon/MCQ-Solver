@@ -1,0 +1,15 @@
+[project]
+name = "closed-questions-ai"
+version = "0.1.0"
+description = "auto-AI solutions to closed questions "
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "customtkinter>=5.2.2",
+    "dotenv>=0.9.9",
+    "emoji>=2.14.1",
+    "odfpy>=1.4.1",
+    "openai>=1.65.1",
+    "pillow>=11.1.0",
+    "pytesseract>=0.3.13",
+]

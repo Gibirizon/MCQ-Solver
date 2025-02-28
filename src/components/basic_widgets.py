@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-from settings import Colors, Fonts
+from ..settings import Colors, Fonts
 
 
 class Title(ctk.CTkLabel):
@@ -25,7 +25,9 @@ class Text(ctk.CTkTextbox):
             master=parent,
             wrap="word",
             fg_color=Colors.TEXTBOX,
-            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+            font=ctk.CTkFont(
+                family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE, weight="normal"
+            ),
             border_color=Colors.BORDER_TEXTBOX,
             border_width=2,
             border_spacing=10,
@@ -40,5 +42,7 @@ class CommonLabel(ctk.CTkLabel):
         super().__init__(
             master=parent,
             text=text,
-            font=ctk.CTkFont(family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE),
+            font=ctk.CTkFont(
+                family=Fonts.NORMAL, size=Fonts.NORMAL_SIZE, weight="normal"
+            ),
         )

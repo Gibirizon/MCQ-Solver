@@ -3,9 +3,9 @@ from os.path import exists
 import customtkinter as ctk
 from odf.opendocument import OpenDocumentText
 
-from basic_widgets import CommonLabel
-from settings import Colors
-from tabview_utils import SettingsButtons, SettingsEntry
+from ...settings import Colors
+from ..basic_widgets import CommonLabel
+from .tabview_utils import SettingsButtons, SettingsEntry
 
 
 class ExtendFile(ctk.CTkFrame):
