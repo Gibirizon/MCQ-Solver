@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL.Image import Image
-from pytesseract import image_to_string
+
+from src.utils.image_processing import get_text_from_img
 
 from .basic_widgets import RadioButton, Text, Title
 from .image import ImageImport
@@ -85,10 +86,26 @@ class LeftMenu(ctk.CTkFrame):
     def add_solution(self, solution: str):
         self.textbox.insert("end", solution)
 
+    def add_paste_next_question_button(self, paste_next_question_func):
+        self.paste_next = self.settings.create_button(
+            "Navigate", "Paste next question", paste_next_question_func
+        )
+        self.paste_next.pack(expand=True)
 
-def get_text_from_img(image: Image):
-    text = image_to_string(
-        image=image,
-        lang="pol",
-    )
-    return text
+    def reset(self):
+        self.textbox.delete("1.0", "end")
+
+        # remove export tab
+        if self.tab_exists("Export"):
+            self.settings.delete("Export")
+
+        # remove paste_next_question button
+        self.paste_next.destroy()
+
+    def tab_exists(self, tab_name):
+        """Check if a tab exists in the tabview."""
+        try:
+            self.settings.index(tab_name)
+            return True
+        except ValueError:
+            return False

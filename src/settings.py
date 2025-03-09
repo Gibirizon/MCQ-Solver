@@ -2,8 +2,9 @@
 class Geometry:
     MAIN = (1200, 1000)
     HELP = (500, 500)
-    SUCCEESS_SAVE = (500, 200)
+    # INFO = (500, 200)
     CORNER_RADIUS = 20
+    MONITORS = 2
 
 
 # Colors class for different elements in UI
@@ -21,6 +22,12 @@ class Colors:
     IMAGE_FRAME = "#555555"
 
 
+class AlertsColors:
+    SUCCESS = {"bg": "#d4edda", "text": "#2d693a"}
+    DANGER = {"bg": "#f8d7da", "text": "#82323a"}
+    INFO = {"bg": "#cce5ff", "text": "#225b99"}
+
+
 # Fonts class for different elements in UI
 class Fonts:
     NORMAL = "Quicksand Medium"
@@ -34,7 +41,7 @@ class Fonts:
 # Longer texts:
 # Prompt for AI to generate great response in a specific format
 PROMPT_EXPLANATION = """
-Jesteś specjalistą w dziedzinie informatyki i właśnie otrzymałeś pytanie, na które musisz podać poprawną odpowiedź z podanych opcji.
+Jesteś specjalistą w dziedzinie informatyki i właśnie otrzymałeś pytanie, na które musisz podać poprawną odpowiedź z podanych opcji. Przed odpowiedzią dokładnie przeanalizuj pytanie i zwróć uwagę, o co pytają autorzy.
 Napisz poprawną odpowiedź na to pytanie, wyjaśnij dlaczego wybrałeś tę opcję oraz opisz pozostałe pojęcia, które miałeś do wyboru, z odniesieniem do tematu pytania.
 Format twojej wypowiedzi ma być podzielony na paragrafy z nagłówkami. Uwzględnij następujące nagłówki: "Poprawna odpowiedź", "Wyjaśnienie wybranej opcji", "Pozostałe odpowiedzi".
 Przykład:

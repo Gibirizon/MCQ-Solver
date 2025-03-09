@@ -1,27 +1,82 @@
+import tkinter as tk
+from enum import Enum
+
 import customtkinter as ctk
 
 from ..components.basic_widgets import CommonLabel
-from ..settings import Fonts, Geometry
+from ..settings import AlertsColors, Fonts, Geometry
 
 
-class InformationWindow(ctk.CTkToplevel):
-    def __init__(self, parent):
-        super().__init__(master=parent)
-        width = Geometry.SUCCEESS_SAVE[0]
-        height = Geometry.SUCCEESS_SAVE[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
-        half_height = int((self.winfo_screenheight() / 2) - (height / 2))
+class InfoType(Enum):
+    SUCCESS = AlertsColors.SUCCESS
+    DANGER = AlertsColors.DANGER
+    INFO = AlertsColors.INFO
 
-        self.geometry(f"{width}x{height}+{half_width}+{half_height}")
-        self.minsize(width, height)
-        self.title("Success")
 
-        self.success_label = CommonLabel(self, "Successfully saved file")
-        self.success_label.configure(
+class InformationWindow(ctk.CTkFrame):
+    def __init__(
+        self, parent, message: str, info_type: InfoType, auto_destroy_after: int = 5000
+    ):
+        """
+        Creates an information window that auto-destroys after a specified time
+
+        Parameters:
+        parent -- Parent widget
+        message -- Message to display
+        type -- Type of information (SUCCESS, DANGER, INFO)
+        auto_destroy_after -- Time in milliseconds before auto-destruction (default: 5000ms/5s)
+        """
+        super().__init__(master=parent, fg_color="transparent")
+
+        # Container with rounded corners
+        container = ctk.CTkButton(
+            master=self,
+            corner_radius=20,
+            fg_color=info_type.value["bg"],
+            hover_color=info_type.value["bg"],
+            text=" ",
+            state="disabled",
+        )
+        container.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Message label
+        self.message_label = CommonLabel(self, text=message)
+        self.message_label.configure(
             font=ctk.CTkFont(
                 family=Fonts.ANSWER,
                 size=Fonts.ANSWER_SIZE,
                 weight="bold",
-            )
+            ),
+            text_color=info_type.value["text"],
+            fg_color=info_type.value["bg"],
         )
-        self.success_label.pack(expand=True, fill="both")
+        self.message_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Close button (X) in top right corner
+        self.close_button = ctk.CTkButton(
+            master=self,
+            text="X",
+            width=25,
+            height=25,
+            corner_radius=0,
+            fg_color=info_type.value["bg"],
+            hover_color="#000000",
+            text_color=info_type.value["text"],
+            font=ctk.CTkFont(weight="bold"),
+            command=self.destroy_window,
+            border_width=0,
+        )
+        self.close_button.place(relx=0.95, rely=0.15, anchor="center")
+
+        # Position the window
+        self.place(rely=0.01, relx=0.01, relheight=0.1, relwidth=0.43)
+
+        # Schedule auto-destruction
+        self.after_id = self.after(auto_destroy_after, self.destroy_window)
+
+    def destroy_window(self):
+        """Destroy the window and cancel any pending auto-destruction"""
+        if hasattr(self, "after_id") and self.after_id is not None:
+            self.after_cancel(self.after_id)
+            self.after_id = None  # Clean up the reference
+        self.destroy()

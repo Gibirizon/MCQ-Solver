@@ -10,7 +10,9 @@ class HelpWindow(ctk.CTkToplevel):
         super().__init__(master=parent)
         width = Geometry.HELP[0]
         height = Geometry.HELP[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
+        half_width = int(
+            (self.winfo_screenwidth() / Geometry.MONITORS / 2) - (width / 2)
+        )
         half_height = int((self.winfo_screenheight() / 2) - (height / 2))
 
         self.geometry(f"{width}x{height}+{half_width}+{half_height}")

@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from PIL.Image import Image
 
+from src.windows.user_information import InformationWindow, InfoType
+
 from .components.main_frames import (
     LeftMenu,
     MainContent,
@@ -17,7 +19,9 @@ class App(ctk.CTk):
         self.title("MayaBD")
         width = Geometry.MAIN[0]
         height = Geometry.MAIN[1]
-        half_width = int((self.winfo_screenwidth() / 2) - (width / 2))
+        half_width = int(
+            (self.winfo_screenwidth() / Geometry.MONITORS / 2) - (width / 2)
+        )
         half_height = int((self.winfo_screenheight() / 2) - (height / 2))
         self.geometry(f"{width}x{height}+{half_width}+{half_height}")
         self.minsize(width, height)
@@ -52,8 +56,14 @@ class App(ctk.CTk):
         # left menu widgets - settings + textbox
         self.left_menu = LeftMenu(self, self.back_to_main_menu, self.help)
 
+        InformationWindow(
+            self,
+            message="Welcome to MayaBD!",
+            info_type=InfoType.INFO,
+        )
+
     def help(self):
-        if self.help_window is None or not self.help_window.winfo_exists():
+        if self.help_window is None:
             self.help_window = HelpWindow(
                 self
             )  # create window if its None or destroyed
@@ -75,9 +85,7 @@ class App(ctk.CTk):
         )
 
     def paste_next_question_button(self):
-        self.left_menu.settings.create_button(
-            "Navigate", "Paste next question", self.reset_elements
-        )
+        self.left_menu.add_paste_next_question_button(self.reset_elements)
 
     def export_settings_section(self, image: Image):
         self.left_menu.settings.add_section_for_export(image)
@@ -86,7 +94,8 @@ class App(ctk.CTk):
         self.left_menu.add_solution(solution)
 
     def reset_elements(self):
-        self.main_content.grid_forget()
-        self.left_menu.grid_forget()
+        self.main_content.destroy()
+        self.left_menu.reset()
 
-        self.exam_layout()
+        # create new main content
+        self.main_content = MainContent(self)

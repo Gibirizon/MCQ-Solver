@@ -1,4 +1,5 @@
-from os.path import dirname
+from enum import Enum
+from pathlib import Path
 from typing import cast
 
 import customtkinter as ctk
@@ -8,6 +9,9 @@ from odf.draw import Image as odfImage
 from odf.opendocument import load
 from odf.text import P
 from PIL.Image import Image
+
+from src.anki.connect_anki import Anki
+from src.components.basic_widgets import CommonLabel, OptionMenu
 
 from ...settings import Colors
 from ...windows.user_information import InformationWindow
@@ -51,34 +55,71 @@ class Settings(ctk.CTkTabview):
         self.dir_path_string = ctk.StringVar()
         self.file_name_string = ctk.StringVar()
 
+        # chosing export option
+        self.export_option_string = ctk.StringVar(value=ExportOptions.ANKI.value)
+
+        # anki deck option
+        self.anki_deck_string = ctk.StringVar()
+
         self.place(rely=0.75, relx=0, relheight=0.25, relwidth=1)
 
     def create_button(self, tab: str, text: str, func):
-        SettingsButtons(self.tab(tab), text, func).pack(expand=True)
+        return SettingsButtons(self.tab(tab), text, func)
 
     def add_section_for_export(self, image: Image):
-        self.add("Export")
-        self.new_file_button = SettingsButtons(
-            self.tab("Export"),
-            "Create new file (required to add content to this file later)",
-            self.new_file_layout,
-        )
-        self.new_file_button.pack(expand=True)
-        self.extend_file_button = SettingsButtons(
-            self.tab("Export"),
-            "Extend previously created file",
-            self.extend_file_layout,
-        )
-        self.extend_file_button.pack(expand=True)
         # save image to later export it
         self.image = image
 
-    def remove_button_in_export(self):
-        cast(SettingsButtons, self.new_file_button).pack_forget()
-        cast(SettingsButtons, self.extend_file_button).pack_forget()
+        # create new tab to export answer to a markdown/odt file
+        self.add("Export")
+
+        self.export_frame = ctk.CTkFrame(self.tab("Export"))
+        self.export_frame.place(
+            relx=0.5, rely=0.5, relheight=0.7, relwidth=0.5, anchor="center"
+        )
+
+        CommonLabel(self.export_frame, "Select export method:").pack(
+            pady=5, expand=True
+        )
+        export_values = [option.value for option in ExportOptions]
+        self.option_menu = OptionMenu(
+            self.export_frame, self.export_option_string, export_values
+        )
+
+        SettingsButtons(
+            self.export_frame,
+            "Submit choice",
+            self.choose_export_option,
+        ).pack(expand=True)
+
+    def choose_export_option(self):
+        self.remove_options_layout()
+        if self.export_option_string.get() == ExportOptions.NEW.value:
+            self.new_file_layout()
+        elif self.export_option_string.get() == ExportOptions.EXTEND.value:
+            self.extend_file_layout()
+        elif self.export_option_string.get() == ExportOptions.ANKI.value:
+            self.anki_layout()
+
+    def remove_options_layout(self):
+        cast(SettingsButtons, self.option_menu).pack_forget()
+        for child in self.export_frame.winfo_children():
+            child.destroy()
+        # cast(SettingsButtons, self.export_frame).place_forget()
+
+    def anki_layout(self):
+        self.anki_connection = Anki()
+        CommonLabel(self.export_frame, "Select deck:").pack(pady=5, expand=True)
+        decks = self.anki_connection.get_decks()
+        self.anki_decks = OptionMenu(self.export_frame, self.anki_deck_string, decks)
+
+        SettingsButtons(
+            self.export_frame,
+            "Add new note",
+            self.add_new_anki_note,
+        ).pack(expand=True)
 
     def new_file_layout(self):
-        self.remove_button_in_export()
         NewFile(
             self.tab(
                 "Export",
@@ -89,17 +130,23 @@ class Settings(ctk.CTkTabview):
         )
 
     def extend_file_layout(self):
-        self.remove_button_in_export()
         ExtendFile(
             self.tab("Export"),
             self.file_path_string,
             self.export_solution,
         )
 
+    def add_new_anki_note(self):
+        answer_text = self.left_menu.textbox.get("0.0", "end")
+        status = self.anki_connection.add_note(
+            self.anki_deck_string.get(), self.image, answer_text
+        )
+        # add information for user that note was created or not - TODO
+
     def export_solution(self, path):
         # have to first save img in script files, than take it from there
-        dir_name = dirname(__file__)
-        full_image_path = f"{dir_name}/exam_img.png"
+        dir_name = Path(__file__).parent
+        full_image_path = dir_name / "temp_image.png"
         cast(Image, self.image).save(full_image_path)
         write_text = self.left_menu.textbox.get("0.0", "end")
 
@@ -125,5 +172,14 @@ class Settings(ctk.CTkTabview):
         # saving file
         textdoc.save(path)
 
+        # remove img
+        full_image_path.unlink(missing_ok=True)
+
         # message of success
-        InformationWindow(self.left_menu.master)
+        InformationWindow(self.left_menu.master, "Successfully saved file")
+
+
+class ExportOptions(Enum):
+    NEW = "Create new file"
+    EXTEND = "Extend previously created file"
+    ANKI = "Export to Anki deck"

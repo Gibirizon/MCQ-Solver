@@ -1,5 +1,3 @@
-import base64
-from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -9,6 +7,7 @@ from openai import OpenAI
 from PIL.Image import Image
 
 from src.components.basic_widgets import Text
+from src.utils.image_processing import encode_pil_image
 
 if TYPE_CHECKING:
     from src.components.main_frames import MainContent
@@ -60,23 +59,6 @@ class SolutionButton(ctk.CTkButton):
             relwidth=1,
         )
 
-    def encode_pil_image(self, pil_image: Image) -> str:
-        """
-        Encode a PIL Image object to base64 without saving to disk
-
-        Args:
-            pil_image (PIL.Image.Image): The PIL Image object to encode
-
-        Returns:
-            str: Base64 encoded string of the image
-        """
-        buffered = BytesIO()
-        # You can specify the format and quality here
-        pil_image.convert("RGB").save(buffered, format="JPEG")
-        # Get the byte data and encode it
-        img_bytes = buffered.getvalue()
-        return base64.b64encode(img_bytes).decode("utf-8")
-
     def generate_solution(self):
         if self.mode.get() == "text":
             text = self.question_editor.get("0.0", "end")
@@ -84,7 +66,7 @@ class SolutionButton(ctk.CTkButton):
             correct_answer = self.chatbot(prompt)
         else:
             prompt = f"{PROMPT_EXPLANATION}\nPytanie załączyłem jako zdjęcie."
-            base64_string = self.encode_pil_image(cast(Image, self.image))
+            base64_string = encode_pil_image(cast(Image, self.image))
             correct_answer = self.chatbot(prompt, base64_string)
 
         # TODO, when there is no answer, indicate it to user, try to use different model

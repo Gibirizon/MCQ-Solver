@@ -62,3 +62,18 @@ class RadioButton(ctk.CTkRadioButton):
             hover_color=Colors.BUTTON_HOVER,
         )
         self.variable = variable
+
+
+class OptionMenu(ctk.CTkOptionMenu):
+    def __init__(self, parent, variable, values):
+        super().__init__(
+            master=parent,
+            variable=variable,
+            values=values,
+            fg_color=Colors.SETTINGS_SEGMENTED_BG,
+            button_color=Colors.SETTINGS_SEGMENTED_BG,
+            button_hover_color=Colors.BUTTON_HOVER,
+            dropdown_fg_color=Colors.SETTINGS_SEGMENTED_BG,
+            dropdown_hover_color=Colors.BUTTON_HOVER,
+        )
+        self.pack(expand=True)

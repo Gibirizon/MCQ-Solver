@@ -13,4 +13,5 @@ dependencies = [
     "openai>=1.65.1",
     "pillow>=11.1.0",
     "pytesseract>=0.3.13",
+    "requests>=2.32.3",
 ]
