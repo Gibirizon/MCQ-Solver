@@ -2,12 +2,17 @@ from datetime import datetime
 
 import requests
 from PIL.Image import Image
-from requests.exceptions import ConnectionError
 
+from src.components.user_information import InfoType
 from src.utils.image_processing import encode_pil_image
 
 from .config import ADD_NOTE_REQUEST_BODY, HOST_PORT
-from .response_status import ResponseStatus
+from .response_status import (
+    AddNoteResponse,
+    DecksResponse,
+    ResponseInfo,
+    ResponseStatus,
+)
 
 
 class Anki:
@@ -20,40 +25,69 @@ class Anki:
         self.host_port = HOST_PORT
 
     @staticmethod
-    def validate_response(data: dict) -> ResponseStatus:
+    def validate_response(data: dict, success_msg: str) -> ResponseInfo:
         if (
             data.get("error", 0) == 0
         ):  # no error field, if error is missing it will become 0, if error is None everything is all right
-            print("response is missing required error field")
-            return ResponseStatus.MISSING_ERROR_FIELD
+            return ResponseInfo(ResponseStatus.MISSING_ERROR_FIELD)
         elif data.get("result", 0) == 0:
             print("response is missing required result field")
-            return ResponseStatus.MISSING_RESULT_FIELD
+            return ResponseInfo(ResponseStatus.MISSING_RESULT_FIELD)
         elif data["error"]:
-            print(data["error"])
-            return ResponseStatus.ERROR_REPORTED
-        return ResponseStatus.SUCCESS
+            return ResponseInfo(ResponseStatus.ERROR_REPORTED, data["error"])
 
-    def get_decks(self) -> list[str]:
-        data = {"action": "deckNames", "version": 6}
+        return ResponseInfo(ResponseStatus.SUCCESS, success_msg, InfoType.SUCCESS)
+
+    def post_request(self, data: dict) -> ResponseInfo | dict:
         try:
             response = requests.post(self.host_port, json=data)
-            if response.status_code == 405:
-                print(
-                    "8765 Port is in use by another program. Please check that you have anki opened and AnkiConnect installed."
-                )
+            response.raise_for_status()  # Raises HTTPError for bad status codes (4XX, 5XX)
+
+            # Process the response...
             data = response.json()
 
-        except ConnectionError as err:
-            print(f"Error: {err}")
-            return []
+        except requests.exceptions.HTTPError as err:
+            # Handle HTTP errors (status codes 4XX, 5XX)
+            return ResponseInfo(
+                ResponseStatus.ERROR_REPORTED, f"HTTP error occurred: {err}"
+            )
 
-        status = self.validate_response(data)
-        if status != ResponseStatus.SUCCESS:
-            return []
-        return data["result"]
+        except requests.exceptions.ConnectionError as err:
+            # Handle connection errors (DNS failures, refused connections, etc)
+            return ResponseInfo(
+                ResponseStatus.ERROR_REPORTED,
+                f"Connection error occurred: {err}\n8765 Port is probably in use by another program. Please check that you have anki opened and AnkiConnect installed.",
+            )
 
-    def add_note(self, deck: str, img: Image, answer: str) -> ResponseStatus:
+        except requests.exceptions.Timeout as err:
+            # Handle timeout errors
+            return ResponseInfo(
+                ResponseStatus.ERROR_REPORTED, f"Timeout error occurred: {err}"
+            )
+
+        except requests.exceptions.RequestException as err:
+            # Handle any other requests-related errors
+            return ResponseInfo(
+                ResponseStatus.ERROR_REPORTED, f"Request error occurred: {err}"
+            )
+
+        return data  # the response was successful
+
+    def get_decks(self) -> DecksResponse:
+        data = {"action": "deckNames", "version": 6}
+
+        response = self.post_request(data)
+        if isinstance(response, ResponseInfo):
+            return DecksResponse(info=response)
+
+        validation = self.validate_response(
+            response, success_msg="Decks were retrieved successfully"
+        )  # check does response include required fields and no error
+        if validation.status != ResponseStatus.SUCCESS:
+            return DecksResponse(info=validation)
+        return DecksResponse(info=validation, decks=response["result"])
+
+    def add_note(self, deck: str, img: Image, answer: str) -> AddNoteResponse:
         current_date = datetime.now()
         filename = f"{current_date.strftime('%Y%m%d%H%M%S')}.jpg"
         base64_data = encode_pil_image(img)
@@ -67,14 +101,15 @@ class Anki:
         request_data["params"]["note"]["picture"][0]["data"] = base64_data
         request_data["params"]["note"]["fields"]["Back"] = answer
 
-        # ADD back information from the field
-
         # make request to add new note
-        try:
-            response = requests.post(self.host_port, json=request_data)
-        except ConnectionError as err:
-            print(f"Error: {err}")
-            return ResponseStatus.ERROR_REPORTED
+        response = self.post_request(request_data)
 
-        status = self.validate_response(response.json())
-        return status
+        if isinstance(response, ResponseInfo):
+            return AddNoteResponse(info=response)
+
+        validation = self.validate_response(
+            response, success_msg="Note was added successfully"
+        )  # check does response include required fields and no error
+        if validation.status != ResponseStatus.SUCCESS:
+            return AddNoteResponse(info=validation)
+        return AddNoteResponse(info=validation, note_id=response["result"])

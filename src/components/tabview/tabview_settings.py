@@ -11,10 +11,11 @@ from odf.text import P
 from PIL.Image import Image
 
 from src.anki.connect_anki import Anki
+from src.anki.response_status import ResponseStatus
 from src.components.basic_widgets import CommonLabel, OptionMenu
+from src.components.user_information import InfoMessage, InfoType
 
 from ...settings import Colors
-from ...windows.user_information import InformationWindow
 from .export_files import ExtendFile, NewFile
 from .tabview_utils import SettingsButtons
 
@@ -103,15 +104,33 @@ class Settings(ctk.CTkTabview):
 
     def remove_options_layout(self):
         cast(SettingsButtons, self.option_menu).pack_forget()
+        self.remove_children_from_export_frame()
+
+    def remove_children_from_export_frame(self):
         for child in self.export_frame.winfo_children():
             child.destroy()
         # cast(SettingsButtons, self.export_frame).place_forget()
 
     def anki_layout(self):
         self.anki_connection = Anki()
-        CommonLabel(self.export_frame, "Select deck:").pack(pady=5, expand=True)
         decks = self.anki_connection.get_decks()
-        self.anki_decks = OptionMenu(self.export_frame, self.anki_deck_string, decks)
+        InfoMessage(
+            self.left_menu.master,
+            decks.info.message,
+            decks.info.info_type,
+        )
+        if decks.info.status != ResponseStatus.SUCCESS:
+            # restart export
+            self.remove_children_from_export_frame()
+            self.delete("Export")
+            self.add_section_for_export(self.image)
+            return
+
+        CommonLabel(self.export_frame, "Select deck:").pack(pady=5, expand=True)
+
+        self.anki_decks = OptionMenu(
+            self.export_frame, self.anki_deck_string, decks.decks
+        )
 
         SettingsButtons(
             self.export_frame,
@@ -138,10 +157,19 @@ class Settings(ctk.CTkTabview):
 
     def add_new_anki_note(self):
         answer_text = self.left_menu.textbox.get("0.0", "end")
-        status = self.anki_connection.add_note(
+        response = self.anki_connection.add_note(
             self.anki_deck_string.get(), self.image, answer_text
         )
-        # add information for user that note was created or not - TODO
+
+        # display message for the user if something went wrong or request was successful
+        InfoMessage(
+            self.left_menu.master,
+            f"{response.info.message}\nNote ID: {response.note_id}",
+            response.info.info_type,
+        )
+        if response.info.status == ResponseStatus.SUCCESS:
+            self.remove_children_from_export_frame()
+            self.delete("Export")
 
     def export_solution(self, path):
         # have to first save img in script files, than take it from there
@@ -151,32 +179,41 @@ class Settings(ctk.CTkTabview):
         write_text = self.left_menu.textbox.get("0.0", "end")
 
         # adding image
-        textdoc = load(path)
-        p_img = P()
-        textdoc.text.addElement(p_img)  # pyright: ignore
-        photoframe = Frame(
-            width=f"{cast(Image, self.image).size[0] / 2}pt",
-            height=f"{cast(Image, self.image).size[1] / 2}pt",
-            anchortype="paragraph",
-        )
-        href = textdoc.addPicture(full_image_path)
-        photoframe.addElement(odfImage(href=href))
-        p_img.addElement(photoframe)
-        # adding text
-        paragraph = P()
-        teletype.addTextToElement(
-            paragraph,
-            write_text,
-        )
-        textdoc.text.addElement(paragraph)  # pyright: ignore
-        # saving file
-        textdoc.save(path)
+        try:
+            textdoc = load(path)
+            p_img = P()
+            textdoc.text.addElement(p_img)  # pyright: ignore
+            photoframe = Frame(
+                width=f"{cast(Image, self.image).size[0] / 2}pt",
+                height=f"{cast(Image, self.image).size[1] / 2}pt",
+                anchortype="paragraph",
+            )
+            href = textdoc.addPicture(full_image_path)
+            photoframe.addElement(odfImage(href=href))
+            p_img.addElement(photoframe)
+            # adding text
+            paragraph = P()
+            teletype.addTextToElement(
+                paragraph,
+                write_text,
+            )
+            textdoc.text.addElement(paragraph)  # pyright: ignore
+            # saving file
+            textdoc.save(path)
+        except Exception as err:
+            InfoMessage(
+                self.left_menu.master, str(err), InfoType.DANGER
+            )  # error while exporting to .odt file
+            return
 
         # remove img
         full_image_path.unlink(missing_ok=True)
 
         # message of success
-        InformationWindow(self.left_menu.master, "Successfully saved file")
+        InfoMessage(self.left_menu.master, "Successfully saved file", InfoType.SUCCESS)
+
+        self.remove_children_from_export_frame()
+        self.delete("Export")
 
 
 class ExportOptions(Enum):

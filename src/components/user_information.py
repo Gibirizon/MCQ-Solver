@@ -1,10 +1,9 @@
-import tkinter as tk
 from enum import Enum
 
 import customtkinter as ctk
 
-from ..components.basic_widgets import CommonLabel
-from ..settings import AlertsColors, Fonts, Geometry
+from ..settings import AlertsColors, Fonts
+from .basic_widgets import CommonLabel
 
 
 class InfoType(Enum):
@@ -13,7 +12,7 @@ class InfoType(Enum):
     INFO = AlertsColors.INFO
 
 
-class InformationWindow(ctk.CTkFrame):
+class InfoMessage(ctk.CTkFrame):
     def __init__(
         self, parent, message: str, info_type: InfoType, auto_destroy_after: int = 5000
     ):

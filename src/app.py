@@ -1,8 +1,6 @@
 import customtkinter as ctk
 from PIL.Image import Image
 
-from src.windows.user_information import InformationWindow, InfoType
-
 from .components.main_frames import (
     LeftMenu,
     MainContent,
@@ -55,12 +53,6 @@ class App(ctk.CTk):
 
         # left menu widgets - settings + textbox
         self.left_menu = LeftMenu(self, self.back_to_main_menu, self.help)
-
-        InformationWindow(
-            self,
-            message="Welcome to MayaBD!",
-            info_type=InfoType.INFO,
-        )
 
     def help(self):
         if self.help_window is None:
