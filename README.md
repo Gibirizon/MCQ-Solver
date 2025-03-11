@@ -1,20 +1,21 @@
 ﻿# AI-Powered solutions to multiple-choice questions
 
-This project is a Python-based application designed to solve multiple-choice questions (A/B/C/D answers) using Bing AI through the `sydney-py` module. The application features a custom GUI built with `customtkinter` for a seamless user experience.
+This project is a Python-based application designed to solve multiple-choice questions (A/B/C/D answers) using OpenRouter AI through the `openai` module. The application features a custom GUI built with `customtkinter` for a seamless user experience.
 
 ## Features
 
 - **Multiple-Choice Question Solver**: Automatically solve questions with A/B/C/D answers.
-- **Custom GUI**: Intuitive interface built with `customtkinter`.
-- **OCR Integration**: Extract text from images using `pytesseract`.
-- **AI-Powered Solutions**: Generate answers via Bing AI with `sydney-py`.
-- **Image Processing**: Handle images using `Pillow`.
-- **Export Functionality**: Save solutions to `.odt` files using `odfpy`.
+- **Custom GUI**: Intuitive interface built with [customtkinter](https://github.com/TomSchimansky/CustomTkinter).
+- **OCR Integration**: Extract text from images using [pytesseract](https://github.com/madmaze/pytesseract).
+- **AI-Powered Solutions**: Generate answers via [OpenRouter AI](https://openrouter.ai/) with [openai api](https://platform.openai.com/).
+- **Image Processing**: Handle images using [Pillow](https://pillow.readthedocs.io/en/stable/).
+- **Export to files**: Save solutions to `.odt` files using [odfpy](https://github.com/eea/odfpy) or to markdown format `.md`.
+- **Export to flashcard**: Save solution to [anki](https://apps.ankiweb.net/) for later revise and quicker learning.
 
 ## Screenshots
 
-![Main Interface](screenshots/main_interface.png)
-![Solution Display](screenshots/solution_display.png)
+![Main Interface](docs/screenshots/main_interface.png)
+![Solution Display](docs/screenshots/solution_display.png)
 
 ## Installation
 
@@ -30,23 +31,28 @@ To run the application locally:
    cd solving-multiple-choice-questions-with-AI
    ```
 
-2. **Create a Virtual Environment**:
+2. **Create a Virtual Environment and install dependencies**:
 
-   ```sh
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+- For `pip` users:
 
-3. **Install Dependencies**:
+```sh
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
+pip install -e .
+```
 
-   ```sh
-   pip install -r requirements.txt
-   ```
+- For `uv` users:
 
-4. **Run the Application**:
-   ```sh
-   python main.py
-   ```
+```sh
+uv sync
+source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
+```
+
+3. **Run the Application**:
+
+```sh
+python main.py
+```
 
 ## Usage
 
@@ -54,12 +60,16 @@ To run the application locally:
 
    - Enter screenshots of multiple-choice questions from your files or just paste them with Ctrl-V when your cursor is in appropriate area.
 
-2. **Get Solutions**:
+2. **Edit the text or use image**:
 
-   - Click `Get an answer to your question` to get AI-generated answers.
+- After importing screenshot of question you can edit the text taken from the photo with OCR or just use this screenshot directly to get better results.
 
-3. **Export Solutions**:
-   - Save answers to `.odt` files by navigating to `Export` tab.
+3. **Get Solutions**:
+
+   - Click `Get answer to your question` to get AI-generated answers.
+
+4. **Export Solutions**:
+   - Save answers to `.odt` or `.md` files by navigating to `Export` tab. You can also export this question as a flashcard to [anki](https://apps.ankiweb.net/) - powerful flashcards program. To export it to `anki` you need to have [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed.
 
 ---
 

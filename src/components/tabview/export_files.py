@@ -1,3 +1,4 @@
+from enum import Enum
 from os.path import exists
 
 import customtkinter as ctk
@@ -6,6 +7,11 @@ from odf.opendocument import OpenDocumentText
 from ...settings import Colors
 from ..basic_widgets import CommonLabel
 from .tabview_utils import SettingsButtons, SettingsEntry
+
+
+class Extension(Enum):
+    ODT = "odt"
+    MD = "md"
 
 
 class ExtendFile(ctk.CTkFrame):
@@ -24,9 +30,8 @@ class ExtendFile(ctk.CTkFrame):
 
     def open_file_dialog(self):
         path = ctk.filedialog.askopenfilename(
-            filetypes=(("text files", "*.odt"), ("text files", "*.docx")),
+            filetypes=(("libreoffice files", "*.odt"), ("markdown files", "*.md")),
             title="Choose file to extend",
-            initialdir="/home",
         )
         self.path_string.set(path)
 
@@ -63,14 +68,20 @@ class NewFile(ctk.CTkFrame):
 
     def create_new_file(self):
         full_path = f"{self.dir_path.get()}/{self.file_name.get()}"
-        if self.file_name.get()[-4:] != ".odt":
+        extension_index = self.file_name.get().rfind(".")
+        ext = self.file_name.get()[extension_index:]
+        if extension_index == -1 or ext not in [
+            Extension.ODT.value,
+            Extension.MD.value,
+        ]:
             self.file_name.set("Invalid file extension")
             return
         elif exists(full_path):
             self.file_name.set("The file already exists")
             return
-        textdoc = OpenDocumentText()
-        textdoc.save(full_path)
+        if ext == Extension.ODT.value:
+            textdoc = OpenDocumentText()
+            textdoc.save(full_path)
         self.export_func(full_path)
 
 

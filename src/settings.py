@@ -61,8 +61,9 @@ Używaj zwięzłego, konkretnego języka, który będzie łatwy do zrozumienia.
 HELP_TEXT = """
 This program is used to help you solve problems from an IT theory exam (in Polish technical schools you need to pass two such examinations to get technician diploma) to speed up the preparation process. Here are step by step instructions: 
 1) First you should paste an image of the question you are having trouble with (you should have your cursor inside the right widget) or import it from your disk. This image should be a screenshot of the IT exam theory question before clicking on the answer.
-2) Then click the button 'get solution'. The program will communicate with AI and insert explanation to the textbox. That can take a while. After that you can edit this text according to your own preferences.
-3) The last step is exporting this solution. You are able to this by clicking on 'Export' tab in settings in the bottom left corner. You can choose to create new file (which is required if you are exporting a solution for the first time) or extend a file previously created with this application. The only right extension is odt. 
+2) Then you edit the text that was extracted from the screenshot and use it as promt after edit. Or you can just use an image directly.
+3) Click the button 'get solution'. The program will communicate with AI and insert explanation to the textbox. That can take a while. After that you can edit this text according to your own preferences.
+3) The last step is exporting this solution. You are able to this by clicking on 'Export' tab in settings in the bottom left corner. You can choose to create new file (which is required if you are exporting a solution for the first time) or extend a file previously created with this application. You can save your solution to .odt or .md file. You've got also opportunity to export the solution to anki flashcards. You can do that by choosing the correct deck from the menu.
 While creating new file you should insert the proper directory and file name. And in the case of file extending you just need to choose the right file.
 You don't have to export your solution of course. You can simply paste your next problem or go back to main menu by clicking on one of the buttons in 'Navigate' tab.
 """
