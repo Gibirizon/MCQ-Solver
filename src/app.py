@@ -1,3 +1,5 @@
+from typing import final
+
 import customtkinter as ctk
 from PIL.Image import Image
 
@@ -10,6 +12,7 @@ from .settings import Geometry
 from .windows.help_window import HelpWindow
 
 
+@final
 class App(ctk.CTk):
     def __init__(self):
         ctk.set_appearance_mode("dark")
@@ -34,7 +37,7 @@ class App(ctk.CTk):
             weight=1,
             uniform="b",
         )
-        self.help_window = None
+        self.help_window: None | HelpWindow = None
 
         # start widgets
         self.start_menu = StartMenu(
