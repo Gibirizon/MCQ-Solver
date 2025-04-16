@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 from pathlib import Path
 from typing import cast
@@ -6,7 +7,7 @@ import customtkinter as ctk
 from odf import teletype
 from odf.draw import Frame
 from odf.draw import Image as odfImage
-from odf.opendocument import load
+from odf.opendocument import OpenDocumentText, load
 from odf.text import P
 from PIL.Image import Image
 
@@ -16,7 +17,7 @@ from src.components.basic_widgets import CommonLabel, OptionMenu
 from src.components.user_information import InfoMessage, InfoType
 
 from ...settings import Colors
-from .export_files import ExtendFile, NewFile
+from .export_files import ExtendFile, Extension, NewFile
 from .tabview_utils import SettingsButtons
 
 
@@ -171,14 +172,42 @@ class Settings(ctk.CTkTabview):
             self.remove_children_from_export_frame()
             self.delete("Export")
 
-    def export_solution(self, path):
-        # have to first save img in script files, than take it from there
-        dir_name = Path(__file__).parent
-        full_image_path = dir_name / "temp_image.png"
+    def export_solution(self, path, ext: Extension):
+        # have to first save img in chosen dir to use it in libreoffice of markdown
+        # Ensure the parent directory exists
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Generate unique filename for the image in the same directory
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        full_image_path = path.parent / f"image_{timestamp}.png"
         cast(Image, self.image).save(full_image_path)
-        write_text = self.left_menu.textbox.get("0.0", "end")
+        text_to_write = self.left_menu.textbox.get("0.0", "end")
 
         # adding image
+        # TODO add try except block !!!!!!
+        match ext:
+            case Extension.ODT.value:
+                self.odt_export(path, text_to_write, full_image_path)
+            case Extension.MD.value:
+                self.md_export(path, text_to_write, full_image_path)
+
+        # message of success
+        InfoMessage(self.left_menu.master, "Successfully saved file", InfoType.SUCCESS)
+
+        self.remove_children_from_export_frame()
+        self.delete("Export")
+
+    def md_export(self, path: Path, text_to_write: str, image_path: Path):
+        # Prepare the markdown content to append
+        markdown_content = f"![Image]({image_path})\n\n"
+        markdown_content += text_to_write + "\n"
+
+        # Append to existing file or create new
+        with path.open("a", encoding="utf-8") as md_file:
+            md_file.write(markdown_content)
+
+    def odt_export(self, path, text_to_write, image_path):
         try:
             textdoc = load(path)
             p_img = P()
@@ -188,14 +217,14 @@ class Settings(ctk.CTkTabview):
                 height=f"{cast(Image, self.image).size[1] / 2}pt",
                 anchortype="paragraph",
             )
-            href = textdoc.addPicture(full_image_path)
+            href = textdoc.addPicture(image_path)
             photoframe.addElement(odfImage(href=href))
             p_img.addElement(photoframe)
             # adding text
             paragraph = P()
             teletype.addTextToElement(
                 paragraph,
-                write_text,
+                text_to_write,
             )
             textdoc.text.addElement(paragraph)  # pyright: ignore
             # saving file
@@ -207,13 +236,7 @@ class Settings(ctk.CTkTabview):
             return
 
         # remove img
-        full_image_path.unlink(missing_ok=True)
-
-        # message of success
-        InfoMessage(self.left_menu.master, "Successfully saved file", InfoType.SUCCESS)
-
-        self.remove_children_from_export_frame()
-        self.delete("Export")
+        image_path.unlink(missing_ok=True)
 
 
 class ExportOptions(Enum):

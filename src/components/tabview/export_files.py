@@ -79,10 +79,11 @@ class NewFile(ctk.CTkFrame):
         elif exists(full_path):
             self.file_name.set("The file already exists")
             return
+
         if ext == Extension.ODT.value:
             textdoc = OpenDocumentText()
-            textdoc.save(full_path)
-        self.export_func(full_path)
+            textdoc.save(full_path)  # save file to later extend it
+        self.export_func(full_path, ext)
 
 
 class NewFilePath(ctk.CTkFrame):
