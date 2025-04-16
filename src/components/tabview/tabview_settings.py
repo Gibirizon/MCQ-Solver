@@ -7,7 +7,7 @@ import customtkinter as ctk
 from odf import teletype
 from odf.draw import Frame
 from odf.draw import Image as odfImage
-from odf.opendocument import OpenDocumentText, load
+from odf.opendocument import load
 from odf.text import P
 from PIL.Image import Image
 
@@ -19,6 +19,12 @@ from src.components.user_information import InfoMessage, InfoType
 from ...settings import Colors
 from .export_files import ExtendFile, Extension, NewFile
 from .tabview_utils import SettingsButtons
+
+
+class ExportOptions(Enum):
+    NEW = "Create new file"
+    EXTEND = "Extend previously created file"
+    ANKI = "Export to Anki deck"
 
 
 class Settings(ctk.CTkTabview):
@@ -172,25 +178,36 @@ class Settings(ctk.CTkTabview):
             self.remove_children_from_export_frame()
             self.delete("Export")
 
-    def export_solution(self, path, ext: Extension):
-        # have to first save img in chosen dir to use it in libreoffice of markdown
-        # Ensure the parent directory exists
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+    def export_solution(self, full_path: str, ext: Extension):
+        # have to first save img in chosen dir to use it in libreoffice or markdown
+        path = Path(full_path)
+        path.parent.mkdir(
+            parents=True, exist_ok=True
+        )  # Ensure the parent directory exists
 
         # Generate unique filename for the image in the same directory
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         full_image_path = path.parent / f"image_{timestamp}.png"
-        cast(Image, self.image).save(full_image_path)
+        self.image.save(full_image_path)
         text_to_write = self.left_menu.textbox.get("0.0", "end")
 
         # adding image
         # TODO add try except block !!!!!!
-        match ext:
-            case Extension.ODT.value:
-                self.odt_export(path, text_to_write, full_image_path)
-            case Extension.MD.value:
-                self.md_export(path, text_to_write, full_image_path)
+        try:
+            match ext:
+                case Extension.ODT.value:
+                    self.odt_export(path, text_to_write, full_image_path)
+                case Extension.MD.value:
+                    self.md_export(path, text_to_write, full_image_path)
+                case _:
+                    raise Exception
+        except Exception:
+            InfoMessage(
+                self.left_menu.master,
+                "Something went wrong while exporting",
+                InfoType.DANGER,
+            )
+            return
 
         # message of success
         InfoMessage(self.left_menu.master, "Successfully saved file", InfoType.SUCCESS)
@@ -207,14 +224,14 @@ class Settings(ctk.CTkTabview):
         with path.open("a", encoding="utf-8") as md_file:
             md_file.write(markdown_content)
 
-    def odt_export(self, path, text_to_write, image_path):
+    def odt_export(self, path: Path, text_to_write: str, image_path: Path):
         try:
             textdoc = load(path)
             p_img = P()
-            textdoc.text.addElement(p_img)  # pyright: ignore
+            textdoc.text.addElement(p_img)  # pyright: ignore[reportAttributeAccessIssue]
             photoframe = Frame(
-                width=f"{cast(Image, self.image).size[0] / 2}pt",
-                height=f"{cast(Image, self.image).size[1] / 2}pt",
+                width=f"{self.image.size[0] / 2}pt",
+                height=f"{self.image.size[1] / 2}pt",
                 anchortype="paragraph",
             )
             href = textdoc.addPicture(image_path)
@@ -226,20 +243,10 @@ class Settings(ctk.CTkTabview):
                 paragraph,
                 text_to_write,
             )
-            textdoc.text.addElement(paragraph)  # pyright: ignore
-            # saving file
+            textdoc.text.addElement(paragraph)  # pyright: ignore[reportAttributeAccessIssue]
             textdoc.save(path)
+
+            # remove img
+            image_path.unlink(missing_ok=True)
         except Exception as err:
-            InfoMessage(
-                self.left_menu.master, str(err), InfoType.DANGER
-            )  # error while exporting to .odt file
-            return
-
-        # remove img
-        image_path.unlink(missing_ok=True)
-
-
-class ExportOptions(Enum):
-    NEW = "Create new file"
-    EXTEND = "Extend previously created file"
-    ANKI = "Export to Anki deck"
+            raise err
