@@ -8,11 +8,11 @@ dependencies = [
     "customtkinter>=5.2.2",
     "debugpy>=1.8.12",
     "dotenv>=0.9.9",
+    "easyocr>=1.7.2",
     "emoji>=2.14.1",
     "odfpy>=1.4.1",
     "openai>=1.65.1",
     "pillow>=11.1.0",
-    "pytesseract>=0.3.13",
     "requests>=2.32.3",
 ]
 
