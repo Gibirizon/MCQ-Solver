@@ -5,7 +5,7 @@ ADD_NOTE_REQUEST_BODY = {
     "params": {
         "note": {
             "deckName": None,
-            "modelName": "Basic",
+            "modelName": "KaTeX and Markdown Basic (Color)",
             "fields": {"Front": "", "Back": None},
             "options": {
                 "allowDuplicate": False,

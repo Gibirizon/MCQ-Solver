@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import customtkinter as ctk
 from dotenv import dotenv_values
@@ -66,7 +66,7 @@ class SolutionButton(ctk.CTkButton):
             correct_answer = self.chatbot(prompt)
         else:
             prompt = f"{PROMPT_EXPLANATION}\nPytanie załączyłem jako zdjęcie."
-            base64_string = encode_pil_image(cast(Image, self.image))
+            base64_string = encode_pil_image(self.image)
             correct_answer = self.chatbot(prompt, base64_string)
 
         # TODO, when there is no answer, indicate it to user, try to use different model
@@ -97,7 +97,7 @@ class SolutionButton(ctk.CTkButton):
             content = prompt
 
         completion = client.chat.completions.create(
-            model="google/gemini-exp-1206:free",
+            model="google/gemini-2.0-flash-thinking-exp:free",
             messages=[{"role": "user", "content": content}],
             temperature=0.7,
             top_p=0.5,

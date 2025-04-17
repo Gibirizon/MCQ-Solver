@@ -58,6 +58,7 @@ class ImageImport(ctk.CTkFrame):
             # working on image
             self.image = Image.open(path) if path else ImageGrab.grabclipboard()
             if not isinstance(self.image, Image.Image):
+                # TODO: add error message for the user
                 return
             self.image_ratio = self.image.size[0] / self.image.size[1]
             self.image_tk = ImageTk.PhotoImage(image=self.image)

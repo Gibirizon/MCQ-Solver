@@ -43,17 +43,19 @@ class Fonts:
 PROMPT_EXPLANATION = """
 Jesteś specjalistą w dziedzinie informatyki i właśnie otrzymałeś pytanie, na które musisz podać poprawną odpowiedź z podanych opcji. Przed odpowiedzią dokładnie przeanalizuj pytanie i zwróć uwagę, o co pytają autorzy.
 Napisz poprawną odpowiedź na to pytanie, wyjaśnij dlaczego wybrałeś tę opcję oraz opisz pozostałe pojęcia, które miałeś do wyboru, z odniesieniem do tematu pytania.
-Format twojej wypowiedzi ma być podzielony na paragrafy z nagłówkami. Uwzględnij następujące nagłówki: "Poprawna odpowiedź", "Wyjaśnienie wybranej opcji", "Pozostałe odpowiedzi".
+Format twojej wypowiedzi ma być podzielony za pomocą nagłowków, paragrafów i list. Uwzględnij następujące nagłówki: "Poprawna odpowiedź", "Wyjaśnienie wybranej opcji", "Pozostałe odpowiedzi".
 Przykład:
-```
+"
 Poprawna odpowiedź: Odpowiedź: C
+
 Wyjaśnienie wybranej opcji:
 Wybrałem protokół SMTP, ponieważ służy on do wysyłania wiadomości e-mail od klientów na serwer poczty e-mail. Protokół ten działa na porcie 25 i może być również używany do przekazywania wiadomości e-mail ze źródłowego do docelowego serwera poczty e-mail. Protokół SMTP rzeczywiście służy do wysyłania wiadomości e-mail, jest więc poprawną odpowiedzią.
+
 Pozostałe odpowiedzi:
-Odpowiedź A - protokół POP3 jest używany przez klientów poczty e-mail do pobierania wiadomości z serwera poczty e-mail. Działa on na porcie 110. Protokól ten dotyczy więc poczty e-mail, ale ma przeciwne działanie niż wysyłanie e-maili, a mianowicie ich odbieranie.
-Odpowiedź B - DNS to protokół służący do tłumaczenia nazw domenowych (np. www.example.com) na adresy IP. Używa UDP do żądań i transferu informacji między serwerami DNS. W razie potrzeby do odpowiedzi DNS będzie używał TCP. DNS działa na porcie 53. Protokół DNS ma więc inne działanie niż wysyłanie wiadomości e-mail, nie może być to poprawna odpowiedź.
-Odpowiedź D - SSH służy do zdalnego zarządzania i bezpiecznego dostępu do zdalnych systemów. Udostępnia wiersz poleceń na komputerze zdalnym. Działa na porcie 22 i zapewnia silnie uwierzytelnianie i szyfrowany transport danych między klientem a komputerem zdalnym. Protokół SSH nie jest zatem związany z tematem pytania, gdyż posiada on zupełnie odmienne zastosowanie.
-```
+ - Odpowiedź A - protokół POP3 jest używany przez klientów poczty e-mail do pobierania wiadomości z serwera poczty e-mail. Działa on na porcie 110. Protokól ten dotyczy więc poczty e-mail, ale ma przeciwne działanie niż wysyłanie e-maili, a mianowicie ich odbieranie.
+- Odpowiedź B - DNS to protokół służący do tłumaczenia nazw domenowych (np. www.example.com) na adresy IP. Używa UDP do żądań i transferu informacji między serwerami DNS. W razie potrzeby do odpowiedzi DNS będzie używał TCP. DNS działa na porcie 53. Protokół DNS ma więc inne działanie niż wysyłanie wiadomości e-mail, nie może być to poprawna odpowiedź.
+- Odpowiedź D - SSH służy do zdalnego zarządzania i bezpiecznego dostępu do zdalnych systemów. Udostępnia wiersz poleceń na komputerze zdalnym. Działa na porcie 22 i zapewnia silnie uwierzytelnianie i szyfrowany transport danych między klientem a komputerem zdalnym. Protokół SSH nie jest zatem związany z tematem pytania, gdyż posiada on zupełnie odmienne zastosowanie.
+"
 Używaj zwięzłego, konkretnego języka, który będzie łatwy do zrozumienia.
 """
 

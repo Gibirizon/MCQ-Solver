@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import final
 
 import customtkinter as ctk
 
@@ -12,9 +13,14 @@ class InfoType(Enum):
     INFO = AlertsColors.INFO
 
 
+@final
 class InfoMessage(ctk.CTkFrame):
     def __init__(
-        self, parent, message: str, info_type: InfoType, auto_destroy_after: int = 5000
+        self,
+        parent: ctk.CTkFrame,
+        message: str,
+        info_type: InfoType,
+        auto_destroy_after: int = 5000,
     ):
         """
         Creates an information window that auto-destroys after a specified time
@@ -42,14 +48,16 @@ class InfoMessage(ctk.CTkFrame):
         self.message_label = CommonLabel(self, text=message)
         self.message_label.configure(
             font=ctk.CTkFont(
-                family=Fonts.ANSWER,
-                size=Fonts.ANSWER_SIZE,
+                family=Fonts.NORMAL,
+                size=Fonts.NORMAL_SIZE,
                 weight="bold",
             ),
             text_color=info_type.value["text"],
             fg_color=info_type.value["bg"],
         )
-        self.message_label.place(relx=0.5, rely=0.5, anchor="center")
+        self.message_label.place(
+            relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9
+        )
 
         # Close button (X) in top right corner
         self.close_button = ctk.CTkButton(

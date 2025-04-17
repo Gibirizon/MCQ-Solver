@@ -17,14 +17,15 @@ class Extension(Enum):
 class ExtendFile(ctk.CTkFrame):
     def __init__(self, parent, path_string, export_func):
         super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
+        self.export_func = export_func
         self.path_string = path_string
         SettingsButtons(self, "Open file search", self.open_file_dialog).pack(
             expand=True, pady=5
         )
         SettingsEntry(self, self.path_string)
-        SettingsButtons(
-            self, "Save solution to a file", lambda: export_func(self.path_string.get())
-        ).pack(expand=True, pady=5)
+        SettingsButtons(self, "Save solution to a file", self.extend_file).pack(
+            expand=True, pady=5
+        )
 
         self.pack(expand=True, fill="both")
 
@@ -34,6 +35,10 @@ class ExtendFile(ctk.CTkFrame):
             title="Choose file to extend",
         )
         self.path_string.set(path)
+
+    def extend_file(self):
+        extension = self.path_string.get().split(".")[-1]
+        self.export_func(self.path_string.get(), extension)
 
 
 class NewFile(ctk.CTkFrame):
@@ -50,9 +55,7 @@ class NewFile(ctk.CTkFrame):
             self,
             file_name,
         )
-        SettingsButtons(
-            parent, "Create new file", lambda: self.create_new_file()
-        ).place(
+        SettingsButtons(parent, "Create new file", self.create_new_file).place(
             relx=0.5,
             rely=0.87,
             anchor="center",
@@ -68,9 +71,8 @@ class NewFile(ctk.CTkFrame):
 
     def create_new_file(self):
         full_path = f"{self.dir_path.get()}/{self.file_name.get()}"
-        extension_index = self.file_name.get().rfind(".")
-        ext = self.file_name.get()[extension_index:]
-        if extension_index == -1 or ext not in [
+        extension = self.file_name.get().split(".")[-1]
+        if extension not in [
             Extension.ODT.value,
             Extension.MD.value,
         ]:
@@ -80,10 +82,10 @@ class NewFile(ctk.CTkFrame):
             self.file_name.set("The file already exists")
             return
 
-        if ext == Extension.ODT.value:
+        if extension == Extension.ODT.value:
             textdoc = OpenDocumentText()
             textdoc.save(full_path)  # save file to later extend it
-        self.export_func(full_path, ext)
+        self.export_func(full_path, extension)
 
 
 class NewFilePath(ctk.CTkFrame):

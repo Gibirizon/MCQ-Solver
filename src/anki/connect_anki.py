@@ -56,9 +56,8 @@ class Anki:
             # Handle connection errors (DNS failures, refused connections, etc)
             return ResponseInfo(
                 ResponseStatus.ERROR_REPORTED,
-                f"Connection error occurred: {err}\n8765 Port is probably in use by another program. Please check that you have anki opened and AnkiConnect installed.",
+                "Connection error occurred. \nCheck that the anki application is open and\nthat AnkiConnect is installed.",
             )
-
         except requests.exceptions.Timeout as err:
             # Handle timeout errors
             return ResponseInfo(
