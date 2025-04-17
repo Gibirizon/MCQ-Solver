@@ -1,8 +1,10 @@
 from enum import Enum
-from os.path import exists
+from os.path import exists, isfile
 
 import customtkinter as ctk
 from odf.opendocument import OpenDocumentText
+
+from src.components.user_information import InfoMessage, InfoType
 
 from ...settings import Colors
 from ..basic_widgets import CommonLabel
@@ -15,10 +17,11 @@ class Extension(Enum):
 
 
 class ExtendFile(ctk.CTkFrame):
-    def __init__(self, parent, path_string, export_func):
+    def __init__(self, parent, path_string, export_func, main_window):
         super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
         self.export_func = export_func
         self.path_string = path_string
+        self.main_window = main_window
         SettingsButtons(self, "Open file search", self.open_file_dialog).pack(
             expand=True, pady=5
         )
@@ -37,16 +40,24 @@ class ExtendFile(ctk.CTkFrame):
         self.path_string.set(path)
 
     def extend_file(self):
+        if not isfile(self.path_string.get()):
+            InfoMessage(
+                self.main_window,
+                "File does not exist",
+                InfoType.DANGER,
+            )
+            return
         extension = self.path_string.get().split(".")[-1]
         self.export_func(self.path_string.get(), extension)
 
 
 class NewFile(ctk.CTkFrame):
-    def __init__(self, parent, dir_path, file_name, export_func):
+    def __init__(self, parent, dir_path, file_name, export_func, main_window):
         super().__init__(master=parent, fg_color=Colors.SETTINGS_SEGMENTED_BG)
         self.dir_path = dir_path
         self.file_name = file_name
         self.export_func = export_func
+        self.main_window = main_window
         NewFilePath(
             self,
             dir_path,
@@ -76,10 +87,18 @@ class NewFile(ctk.CTkFrame):
             Extension.ODT.value,
             Extension.MD.value,
         ]:
-            self.file_name.set("Invalid file extension")
+            InfoMessage(
+                self.main_window,
+                "Invalid file extension",
+                InfoType.DANGER,
+            )
             return
         elif exists(full_path):
-            self.file_name.set("The file already exists")
+            InfoMessage(
+                self.main_window,
+                "File already exists",
+                InfoType.DANGER,
+            )
             return
 
         if extension == Extension.ODT.value:

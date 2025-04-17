@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING, cast
 
 import customtkinter as ctk
-from PIL import Image, ImageGrab, ImageTk
+from PIL import Image, ImageGrab, ImageTk, UnidentifiedImageError
+
+from src.components.user_information import InfoMessage, InfoType
 
 from ..settings import Colors
 from .basic_widgets import CommonLabel
@@ -56,9 +58,14 @@ class ImageImport(ctk.CTkFrame):
     ):
         if self.focus_get() == self:
             # working on image
-            self.image = Image.open(path) if path else ImageGrab.grabclipboard()
-            if not isinstance(self.image, Image.Image):
-                # TODO: add error message for the user
+            try:
+                self.image = Image.open(path) if path else ImageGrab.grabclipboard()
+            except UnidentifiedImageError:
+                InfoMessage(
+                    self.main_content.master,
+                    "Unsupported image format\nOR\nNo image found in clipboard",
+                    InfoType.INFO,
+                )
                 return
             self.image_ratio = self.image.size[0] / self.image.size[1]
             self.image_tk = ImageTk.PhotoImage(image=self.image)

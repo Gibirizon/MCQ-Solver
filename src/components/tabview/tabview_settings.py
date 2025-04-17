@@ -153,6 +153,7 @@ class Settings(ctk.CTkTabview):
             self.dir_path_string,
             self.file_name_string,
             self.export_solution,
+            self.left_menu.master,
         )
 
     def extend_file_layout(self):
@@ -160,6 +161,7 @@ class Settings(ctk.CTkTabview):
             self.tab("Export"),
             self.file_path_string,
             self.export_solution,
+            self.left_menu.master,
         )
 
     def add_new_anki_note(self):
@@ -191,8 +193,6 @@ class Settings(ctk.CTkTabview):
         self.image.save(full_image_path)
         text_to_write = self.left_menu.textbox.get("0.0", "end")
 
-        # adding image
-        # TODO add try except block !!!!!!
         try:
             match ext:
                 case Extension.ODT.value:

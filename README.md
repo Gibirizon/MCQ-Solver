@@ -6,7 +6,7 @@ This project is a Python-based application designed to solve multiple-choice que
 
 - **Multiple-Choice Question Solver**: Automatically solve questions with A/B/C/D answers.
 - **Custom GUI**: Intuitive interface built with [customtkinter](https://github.com/TomSchimansky/CustomTkinter).
-- **OCR Integration**: Extract text from images using [pytesseract](https://github.com/madmaze/pytesseract).
+- **OCR Integration**: Extract text from images using [easyocr](https://github.com/JaidedAI/EasyOCR).
 - **AI-Powered Solutions**: Generate answers via [OpenRouter AI](https://openrouter.ai/) with [openai api](https://platform.openai.com/).
 - **Image Processing**: Handle images using [Pillow](https://pillow.readthedocs.io/en/stable/).
 - **Export to files**: Save solutions to `.odt` files using [odfpy](https://github.com/eea/odfpy) or to markdown format `.md`.
@@ -26,10 +26,10 @@ To run the application locally:
 
 1. **Clone the Repository**:
 
-   ```sh
-   git clone https://github.com/Gibirizon/solving-multiple-choice-questions-with-AI.git
-   cd solving-multiple-choice-questions-with-AI
-   ```
+    ```sh
+    git clone https://github.com/Gibirizon/solving-multiple-choice-questions-with-AI.git
+    cd solving-multiple-choice-questions-with-AI
+    ```
 
 2. **Create a Virtual Environment and install dependencies**:
 
@@ -58,7 +58,7 @@ python main.py
 
 1. **Input Questions**:
 
-   - Enter screenshots of multiple-choice questions from your files or just paste them with Ctrl-V when your cursor is in appropriate area.
+    - Enter screenshots of multiple-choice questions from your files or just paste them with Ctrl-V when your cursor is in appropriate area.
 
 2. **Edit the text or use image**:
 
@@ -66,10 +66,10 @@ python main.py
 
 3. **Get Solutions**:
 
-   - Click `Get answer to your question` to get AI-generated answers.
+    - Click `Get answer to your question` to get AI-generated answers.
 
 4. **Export Solutions**:
-   - Save answers to `.odt` or `.md` files by navigating to `Export` tab. You can also export this question as a flashcard to [anki](https://apps.ankiweb.net/) - powerful flashcards program. To export it to `anki` you need to have [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed.
+    - Save answers to `.odt` or `.md` files by navigating to `Export` tab. You can also export this question as a flashcard to [anki](https://apps.ankiweb.net/) - powerful flashcards program. To export it to `anki` you need to have [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed.
 
 ---
 
