@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import customtkinter as ctk
 from dotenv import dotenv_values
@@ -7,6 +7,7 @@ from openai import OpenAI
 from PIL.Image import Image
 
 from src.components.basic_widgets import Text
+from src.components.user_information import InfoMessage, InfoType
 from src.utils.image_processing import encode_pil_image
 
 if TYPE_CHECKING:
@@ -97,9 +98,25 @@ class SolutionButton(ctk.CTkButton):
             content = prompt
 
         completion = client.chat.completions.create(
-            model="google/gemini-2.0-flash-thinking-exp:free",
-            messages=[{"role": "user", "content": content}],
+            model="google/gemma-3-27b-it:free",
+            messages=[{"role": "user", "content": content}],  # pyright: ignore[reportArgumentType]
             temperature=0.7,
             top_p=0.5,
         )
+        if not completion.choices:
+            if completion.model_extra:
+                error = cast(str, completion.model_extra["error"]["message"])
+                InfoMessage(
+                    self.parent.main_window,
+                    f"Chatbot error:\n {error}",
+                    InfoType.DANGER,
+                )
+                return None
+            InfoMessage(
+                self.parent.main_window,
+                "Chatbot error: No answer",
+                InfoType.DANGER,
+            )
+            return None
+
         return completion.choices[0].message.content

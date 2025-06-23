@@ -67,6 +67,13 @@ class ImageImport(ctk.CTkFrame):
                     InfoType.INFO,
                 )
                 return
+            if not self.image:
+                InfoMessage(
+                    self.main_content.master,
+                    "No image found in clipboard",
+                    InfoType.INFO,
+                )
+                return
             self.image_ratio = self.image.size[0] / self.image.size[1]
             self.image_tk = ImageTk.PhotoImage(image=self.image)
 
